@@ -3,108 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAT Telegram Game</title>
+    <title>Start Test</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000000);
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            transition: background-color 0.3s;
         }
-
-        .container {
-            max-width: 400px;
-            padding: 30px;
-            border-radius: 12px;
-            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: var(--tg-theme-text-color, #333);
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        p {
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
         button {
-            background-color: var(--tg-theme-button-color, #007bff);
+            background-color: var(--tg-theme-button-color, #50a3ff);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 1.1em;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            margin-top: 20px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        #status {
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: var(--tg-theme-hint-color, #888);
+        button:active {
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
+    <h1>Spremni za kviz?</h1>
+    <p>Kliknite ispod da započnete!</p>
+    <button id="startButton" onclick="sendStartSignal()">🏁 Start Test</button>
 
-<div class="container">
-    <h1>Telegram Appercepconi Test</h1>
-    <p>Ovaj prozor šalje Botu signal za početak testa. Kliknite na dugme ispod da biste dobili prvu sliku i opcije.</p>
-
-    <button onclick="startGame()">Start test</button>
-
-    <div id="status"></div>
-</div>
-
-<script>
-    // Inicijalizacija WebApp objekta
-    const WebApp = window.Telegram.WebApp;
-
-    // Funkcija koja šalje podatke Botu
-    function startGame() {
-        // Provera da li je Telegram Web App interfejs dostupan
-        if (WebApp && WebApp.sendData) {
-            
-            // Kritično: Šalje JSON string { action: 'start_test' }
-            const dataToSend = JSON.stringify({
-                action: 'start_test'
-            });
-
-            WebApp.sendData(dataToSend);
-            document.getElementById('status').innerText = 'Podaci poslati Botu. Proverite Telegram chat.';
-            // Opciono: zatvorite Web App prozor nakon slanja
-            // WebApp.close(); 
+    <script>
+        // Inicijalizacija i provera da li je Telegram Web App spreman
+        if (window.Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            // Optional: Obavestite korisnika da se tema učitala
+            document.body.style.backgroundColor = Telegram.WebApp.themeParams.bg_color;
         } else {
-            document.getElementById('status').innerText = 'Greška: Telegram Web App interfejs nije dostupan.';
+            console.error("Telegram WebApp skripta nije učitana.");
         }
-    }
 
-    // Postavite boju pozadine u zavisnosti od Telegram teme
-    document.addEventListener('DOMContentLoaded', () => {
-        if (WebApp) {
-            WebApp.ready(); // Obavestite Telegram da je Web App spreman
-            // WebApp.MainButton.setText("Start test");
-            // WebApp.MainButton.show();
+        /**
+         * Šalje signal Botu da započne kviz.
+         * Ova funkcija šalje Botu JSON string: '{"action": "start_test"}'
+         */
+        function sendStartSignal() {
+            if (window.Telegram.WebApp && Telegram.WebApp.ready) {
+                // JSON koji Bot očekuje u handle_web_app_data
+                const dataToSend = JSON.stringify({
+                    action: "start_test",
+                    timestamp: new Date().toISOString()
+                });
+                
+                // KRITIČNA LINIJA: Slanje podataka Botu
+                Telegram.WebApp.sendData(dataToSend);
+
+                // Opcionalno: Zatvaranje Mini App-a nakon slanja, jer Bot šalje poruku.
+                Telegram.WebApp.close(); 
+            } else {
+                alert("Greška: Mini App nije spreman za komunikaciju s Botom.");
+            }
         }
-    });
-</script>
-
+    </script>
 </body>
 </html>
