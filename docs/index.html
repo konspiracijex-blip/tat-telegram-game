@@ -35,30 +35,38 @@
         button:active {
             opacity: 0.8;
         }
+        #status {
+            color: var(--tg-theme-hint-color, #888);
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
     <h1>Spremni za kviz?</h1>
     <p>Kliknite ispod da započnete!</p>
     <button id="startButton" onclick="sendStartSignal()">🏁 Start Test</button>
+    <div id="status"></div>
 
     <script>
-        // Inicijalizacija i provera da li je Telegram Web App spreman
+        const statusDiv = document.getElementById('status');
+        
+        // Inicijalizacija i provera
         if (window.Telegram.WebApp) {
             Telegram.WebApp.ready();
-            // Optional: Obavestite korisnika da se tema učitala
+            statusDiv.innerText = "Telegram WebApp je spreman.";
             document.body.style.backgroundColor = Telegram.WebApp.themeParams.bg_color;
         } else {
-            console.error("Telegram WebApp skripta nije učitana.");
+            statusDiv.innerText = "Greška: Nije Telegram okruženje.";
         }
 
         /**
          * Šalje signal Botu da započne kviz.
-         * Ova funkcija šalje Botu JSON string: '{"action": "start_test"}'
          */
         function sendStartSignal() {
             if (window.Telegram.WebApp && Telegram.WebApp.ready) {
-                // JSON koji Bot očekuje u handle_web_app_data
+                statusDiv.innerText = "Šaljem podatke Botu...";
+                
+                // JSON koji Bot očekuje
                 const dataToSend = JSON.stringify({
                     action: "start_test",
                     timestamp: new Date().toISOString()
@@ -67,10 +75,15 @@
                 // KRITIČNA LINIJA: Slanje podataka Botu
                 Telegram.WebApp.sendData(dataToSend);
 
-                // Opcionalno: Zatvaranje Mini App-a nakon slanja, jer Bot šalje poruku.
-                Telegram.WebApp.close(); 
+                statusDiv.innerText = "Podaci poslati. Zatvaranje za 500ms.";
+
+                // DODATO KAŠNJENJE: Dajte Telegramu 500ms da obradi podatke pre zatvaranja.
+                setTimeout(() => {
+                    Telegram.WebApp.close(); 
+                }, 500);
+
             } else {
-                alert("Greška: Mini App nije spreman za komunikaciju s Botom.");
+                statusDiv.innerText = "Greška: Mini App nije spreman za komunikaciju s Botom.";
             }
         }
     </script>
