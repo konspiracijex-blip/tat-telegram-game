@@ -1,108 +1,110 @@
-
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAT IGRA - Test</title>
-    <link rel="stylesheet" href="style.css">
+    <title>TAT Telegram Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--tg-theme-text-color, #333);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        button {
+            background-color: var(--tg-theme-button-color, #007bff);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--tg-theme-hint-color, #888);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Tematski Appercepcioni Test</h1>
-        <div id="pitanje-broj">Pitanje 1 / 10</div>
-        
-        <div class="slika-kontejner">
-            <img id="slika" src="placeholder/slika_01.jpg" alt="Slika za TAT test">
-        </div>
-        
-        <p id="pitanje-tekst">Šta vidite na ovoj slici? (Privremeni tekst)</p>
-        
-        <div id="odgovori-kontejner">
-            <button class="odgovor-btn" data-odgovor="A">A: Odgovor A</button>
-            <button class="odgovor-btn" data-odgovor="B">B: Odgovor B</button>
-            <button class="odgovor-btn" data-odgovor="C">C: Odgovor C</button>
-            <button class="odgovor-btn" data-odgovor="D">D: Odgovor D</button>
-        </div>
-        <div id="status"></div>
-    </div>
 
-    <script>
-        // --- JS LOGIKA ZA SLANJE ODGOVORA BOTU ---
+<div class="container">
+    <h1>Telegram Appercepconi Test</h1>
+    <p>Ovaj prozor šalje Botu signal za početak testa. Kliknite na dugme ispod da biste dobili prvu sliku i opcije.</p>
 
-        let trenutnoPitanje = 1;
-        const ukupanBrojPitanja = 10;
-        
-        // PAZNJA: U realnom scenariju, Bot bi poslao listu pitanja,
-        // ali za MVP koristimo hardkodovane placeholder vrednosti
-        const pitanja = [
-            // Koristite placeholder vrednosti iz data_logic.py za testiranje frontend-a
-            {q: 1, slika: 'placeholder/slika_01.jpg', tekst: 'Šta vidite kada pogledate ovu staru kuću?', odgovori: {A: 'Napušteno, ali puno uspomena.', B: 'Prazan, propadajući objekat.', C: 'Mesto koje čeka novu priču.', D: 'Samo prolaznost vremena.'}},
-            {q: 2, slika: 'placeholder/slika_02.jpg', tekst: 'Ova planina Vas podseća na:', odgovori: {A: 'Prepreku koju treba zaobići.', B: 'Izazov koji treba savladati.', C: 'Miran, stabilan oslonac.', D: 'Simbol večnosti.'}},
-            // ... dodajte 8 ostalih placeholder pitanja za testiranje
-            {q: 10, slika: 'placeholder/slika_10.jpg', tekst: 'Ovaj osmeh Vas navodi da mislite da je osoba:', odgovori: {A: 'Srećna, bez sumnje.', B: 'Nešto krije.', C: 'Pokušava da Vas impresionira.', D: 'Zadovoljna sobom.'}},
-        ];
-        
-        // Inicijalizacija Telegram WebApp
-        if (window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.MainButton.hide(); 
-        } 
-        
-        function ucitajPitanje(index) {
-            if (index > ukupanBrojPitanja) {
-                document.getElementById('odgovori-kontejner').innerHTML = "<h2>Hvala! Vaša procena je generisana. Proverite Telegram chat.</h2>";
-                document.getElementById('pitanje-broj').innerText = "Igra završena";
-                document.getElementById('pitanje-tekst').style.display = 'none';
-                document.getElementById('slika').style.display = 'none';
-                setTimeout(() => {
-                     window.Telegram.WebApp.close(); 
-                }, 2000);
-                return;
-            }
+    <button onclick="startGame()">Start test</button>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    // Inicijalizacija WebApp objekta
+    const WebApp = window.Telegram.WebApp;
+
+    // Funkcija koja šalje podatke Botu
+    function startGame() {
+        // Provera da li je Telegram Web App interfejs dostupan
+        if (WebApp && WebApp.sendData) {
             
-            const pitanjeData = pitanja[index - 1]; // Niz je 0-indeksiran
-            
-            document.getElementById('pitanje-broj').innerText = `Pitanje ${index} / ${ukupanBrobanBrojPitanja}`;
-            document.getElementById('slika').src = pitanjeData.slika;
-            document.getElementById('pitanje-tekst').innerText = pitanjeData.tekst;
-            
-            const odgovoriKontejner = document.getElementById('odgovori-kontejner');
-            odgovoriKontejner.innerHTML = ''; 
-            
-            for (const [key, value] of Object.entries(pitanjeData.odgovori)) {
-                const btn = document.createElement('button');
-                btn.className = 'odgovor-btn';
-                btn.setAttribute('data-odgovor', key);
-                btn.innerText = `${key}: ${value}`;
-                btn.addEventListener('click', handleOdgovorClick);
-                odgovoriKontejner.appendChild(btn);
-            }
+            // Kritično: Šalje JSON string { action: 'start_test' }
+            const dataToSend = JSON.stringify({
+                action: 'start_test'
+            });
+
+            WebApp.sendData(dataToSend);
+            document.getElementById('status').innerText = 'Podaci poslati Botu. Proverite Telegram chat.';
+            // Opciono: zatvorite Web App prozor nakon slanja
+            // WebApp.close(); 
+        } else {
+            document.getElementById('status').innerText = 'Greška: Telegram Web App interfejs nije dostupan.';
         }
+    }
 
-        function handleOdgovorClick() {
-            const odgovor = this.getAttribute('data-odgovor');
-            
-            sendAnswerToBot(trenutnoPitanje, odgovor);
-            
-            trenutnoPitanje++;
-            ucitajPitanje(trenutnoPitanje);
+    // Postavite boju pozadine u zavisnosti od Telegram teme
+    document.addEventListener('DOMContentLoaded', () => {
+        if (WebApp) {
+            WebApp.ready(); // Obavestite Telegram da je Web App spreman
+            // WebApp.MainButton.setText("Start test");
+            // WebApp.MainButton.show();
         }
+    });
+</script>
 
-        function sendAnswerToBot(pitanje, odgovor) {
-            if (window.Telegram.WebApp) {
-                const dataToSend = JSON.stringify({
-                    pitanje: pitanje,
-                    odgovor: odgovor
-                });
-                window.Telegram.WebApp.sendData(dataToSend);
-            } else {
-                 document.getElementById('status').innerText = `Poslat odgovor (offline test): P${pitanje}, O:${odgovor}`;
-            }
-        }
-        
-        window.onload = () => ucitajPitanje(trenutnoPitanje);
-    </script>
 </body>
 </html>
