@@ -10,19 +10,20 @@ logger = logging.getLogger(__name__)
 def setup_gspread(sheet_name):
     """
     Inicijalizuje vezu sa Google Sheets-om koristeći Service Account Credentials.
+    Izmenjeno: Čita creds direktno iz google_creds.json fajla (za PythonAnywhere)
     """
     try:
-        # POUZDAN METOD: Citanje creds JSON stringa iz okruzenjske varijable
-        creds_json_string = os.getenv("SERVICE_ACCOUNT_CREDENTIALS")
-        
-        if not creds_json_string:
-            logger.error("GRESKA: Okruzenjska varijabla SERVICE_ACCOUNT_CREDENTIALS nije postavljena.")
+        # PRIVREMENO: Citanje iz lokalnog fajla na PythonAnywhere
+        try:
+            with open("google_creds.json", "r") as f:
+                creds_dict = json.load(f)
+        except FileNotFoundError:
+            logger.error("GRESKA: google_creds.json nije pronadjen. Proverite da li fajl postoji u bot/ folderu.")
+            return None
+        except json.JSONDecodeError as e:
+            logger.error(f"GRESKA: JSON format credentials-a u google_creds.json je neispravan. Detalji: {e}")
             return None
             
-        # Pretvaranje JSON stringa u Python recnik
-        # NAPOMENA: Potrebno je osigurati da JSON string bude u ispravnom formatu u varijablama okruženja
-        creds_dict = json.loads(creds_json_string)
-
         # Obim (Scope) dozvola koje su Botu potrebne
         scope = [
             'https://spreadsheets.google.com/feeds',
@@ -36,7 +37,7 @@ def setup_gspread(sheet_name):
         # Otvaranje tabele po imenu
         sheet = client.open(sheet_name)
         
-        # Otvaranje taba "Igraci" (Ovo je ime taba unutar vaseg Sheets fajla!)
+        # Otvaranje taba "Igraci" 
         worksheet = sheet.worksheet("Igraci")
         
         logger.info(f"Uspesno povezano sa Google Sheet: {sheet_name}/Igraci")
@@ -48,9 +49,6 @@ def setup_gspread(sheet_name):
     except gspread.exceptions.WorksheetNotFound:
         logger.error(f"GRESKA: Tab 'Igraci' nije pronadjen unutar Sheets-a. Proverite da li je ime taba tacno.")
         return None
-    except json.JSONDecodeError as e:
-        logger.error(f"GRESKA: JSON format credentials-a je neispravan. Proverite navodnike i format. Detalji: {e}")
-        return None
     except Exception as e:
         logger.error(f"GRESKA pri povezivanju sa Google Sheets: {e}")
         return None
@@ -60,9 +58,7 @@ def setup_gspread(sheet_name):
 def create_player_row(worksheet, player_id, timestamp):
     """Kreira novi red za igraca."""
     # Definisemo prazan red sa inicijalnim podacima: ID i Vreme.
-    # U sheets-u imamo 23 kolone: ID, P1, B1, P2, B2, ..., P10, B10, Ukupno, Datum/vreme
-    # Pitanja/Bodovi = 10 * 2 = 20 kolona
-    # Inicijalne kolone (ID, Datum) + Ukupno = 3 kolone
+    # Ukupno 23 kolone: ID, P1, B1, P2, B2, ..., P10, B10, Ukupno, Datum/vreme
     
     # Inicijalizacija 20 praznih kolona za Pitanja/Bodove
     empty_data = [''] * 20 
@@ -85,13 +81,11 @@ def update_player_response(worksheet, player_id, question_num, answer, points):
         row_index = cell.row
 
         # 2. Racunanje indeksa kolone
-        # Pitanje 1: Ans. Col 2, Bod Col 3
-        # Pitanje 10: Ans. Col 20, Bod Col 21
-        # Formula (Kolone su 1-indeksirane):
-        ans_col = 1 + (question_num * 2) - 1 # npr. za P1 -> 1 + 2 - 1 = 2
-        bod_col = 1 + (question_num * 2)     # npr. za P1 -> 1 + 2 = 3
+        # Pitanje N: Ans. Col 1 + (N*2 - 1), Bod Col 1 + (N*2)
+        ans_col = 1 + (question_num * 2) - 1 
+        bod_col = 1 + (question_num * 2)     
         
-        # 3. Azuriranje celija (Batch update je brzi, ali koristimo celiju po celiju za cistocu)
+        # 3. Azuriranje celija 
         worksheet.update_cell(row_index, ans_col, answer)
         worksheet.update_cell(row_index, bod_col, str(points))
         
@@ -107,7 +101,6 @@ def get_player_data(worksheet, player_id):
     """Vraca sve podatke za igraca (za bodovanje)."""
     try:
         cell = worksheet.find(str(player_id), in_column=1)
-        # Vraca niz stringova (cell.row vraca broj reda)
         row_data = worksheet.row_values(cell.row) 
         return row_data
     except gspread.exceptions.CellNotFound:
@@ -127,12 +120,11 @@ def delete_player_row(worksheet, player_id):
         return False
 
 def finalize_player_score(worksheet, player_id, total_score):
-    """Upisuje ukupan skor u kolonu 'Ukupno'."""
+    """Upisuje ukupan skor u kolonu 'Ukupno' (22. kolona)."""
     try:
         cell = worksheet.find(str(player_id), in_column=1)
         row_index = cell.row
         
-        # Kolona 'Ukupno' je 22. kolona u nasem Sheets-u
         TOTAL_SCORE_COL = 22
         
         worksheet.update_cell(row_index, TOTAL_SCORE_COL, str(total_score))
