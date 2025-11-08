@@ -5,72 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TAT TEST</title>
     
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
-            /* Koristi boje iz Telegram teme za bolju integraciju */
-            background-color: var(--tg-theme-bg-color); 
-            color: var(--tg-theme-text-color);
+            background-color: var(--tg-theme-bg-color, #ffffff); 
+            color: var(--tg-theme-text-color, #000000);
+            transition: background-color 0.3s, color 0.3s;
         }
         h1 {
-            color: var(--tg-theme-text-color);
+            color: var(--tg-theme-text-color, #000000);
+            margin-bottom: 5px;
         }
         p {
-            color: var(--tg-theme-hint-color);
+            color: var(--tg-theme-hint-color, #777777);
+            margin-bottom: 30px;
         }
         button {
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
             padding: 15px 30px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 16px;
-            margin-top: 20px;
+            font-size: 18px;
             cursor: pointer;
             border-radius: 8px;
             width: 80%;
             max-width: 300px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        .main-message {
+            margin-top: 40px;
+            font-size: 1.1em;
         }
     </style>
 </head>
 <body>
 
-    <h1>TAT Test</h1>
+    <h1 class="main-message">TAT Test</h1>
     <p>Ovo je eksperimentalni test.</p>
 
-    <button onclick="startTest()">
+    <button id="startButton" onclick="startTest()">
         🏁 Pokreni Kviz
     </button>
     
     <p style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // 1. Inicijalizacija Web App
+        // Inicijalizacija Web App
         Telegram.WebApp.ready();
 
-        // Dodatno: Postavljanje natpisa na Telegram prozoru
+        // Opciono: Postavljanje natpisa na Telegram prozoru (vizuelni detalji)
         Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
-        Telegram.WebApp.MainButton.hide(); // Sakrijemo glavno dugme Telegrama jer koristimo HTML dugme
-
-        // 2. Funkcija koja se pokreće KLIKOM NA DUGME
+        
+        // Funkcija koja se pokreće klikom na dugme
         function startTest() {
-            // Objekat koji šaljemo botu (preuzima ga handle_web_app_data)
+            // Objekat koji šaljemo botu (bot ga obrađuje u handle_web_app_data)
             const dataToSend = {
                 "action": "start_test"
             };
             
-            // Slanje JSON stringa nazad botu.
-            // OVO AUTOMATSKI ZATVARA WEB APP.
+            // Slanje JSON stringa nazad botu. 
+            // Ova komanda bi trebalo da automatski ZATVORI Web App
             Telegram.WebApp.sendData(JSON.stringify(dataToSend));
+            
+            // Dodatna sigurnosna provera za ručno zatvaranje, ako sendData ne uspe da zatvori odmah
+            setTimeout(() => {
+                Telegram.WebApp.close();
+            }, 500); 
         }
-
-        // BITNO: NEMA POZIVA startTest() funkcije automatski!
     </script>
 </body>
 </html>
