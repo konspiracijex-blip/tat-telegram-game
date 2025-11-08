@@ -3,89 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Start Test</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>TAT TEST</title>
+    
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            transition: background-color 0.3s;
+            padding: 20px;
+            text-align: center;
+            /* Koristi boje iz Telegram teme za bolju integraciju */
+            background-color: var(--tg-theme-bg-color); 
+            color: var(--tg-theme-text-color);
+        }
+        h1 {
+            color: var(--tg-theme-text-color);
+        }
+        p {
+            color: var(--tg-theme-hint-color);
         }
         button {
-            background-color: var(--tg-theme-button-color, #50a3ff);
-            color: var(--tg-theme-button-text-color, #ffffff);
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
             border: none;
             padding: 15px 30px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 18px;
+            font-size: 16px;
             margin-top: 20px;
             cursor: pointer;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        #status {
-            color: var(--tg-theme-hint-color, #888);
-            margin-top: 15px;
+            width: 80%;
+            max-width: 300px;
         }
     </style>
 </head>
 <body>
-    <h1>Spremni za kviz?</h1>
-    <p>Kliknite ispod da započnete!</p>
-    <button id="startButton" onclick="sendStartSignal()">🏁 Start Test</button>
-    <div id="status"></div>
 
+    <h1>TAT Test</h1>
+    <p>Ovo je eksperimentalni test.</p>
+
+    <button onclick="startTest()">
+        🏁 Pokreni Kviz
+    </button>
+    
+    <p style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const statusDiv = document.getElementById('status');
-        
-        // Inicijalizacija i provera
-        if (window.Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            statusDiv.innerText = "Telegram WebApp je spreman.";
-            document.body.style.backgroundColor = Telegram.WebApp.themeParams.bg_color;
-        } else {
-            statusDiv.innerText = "Greška: Nije Telegram okruženje.";
+        // 1. Inicijalizacija Web App
+        Telegram.WebApp.ready();
+
+        // Dodatno: Postavljanje natpisa na Telegram prozoru
+        Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
+        Telegram.WebApp.MainButton.hide(); // Sakrijemo glavno dugme Telegrama jer koristimo HTML dugme
+
+        // 2. Funkcija koja se pokreće KLIKOM NA DUGME
+        function startTest() {
+            // Objekat koji šaljemo botu (preuzima ga handle_web_app_data)
+            const dataToSend = {
+                "action": "start_test"
+            };
+            
+            // Slanje JSON stringa nazad botu.
+            // OVO AUTOMATSKI ZATVARA WEB APP.
+            Telegram.WebApp.sendData(JSON.stringify(dataToSend));
         }
 
-        /**
-         * Šalje signal Botu da započne kviz.
-         */
-        function sendStartSignal() {
-            if (window.Telegram.WebApp && Telegram.WebApp.ready) {
-                statusDiv.innerText = "Šaljem podatke Botu...";
-                
-                // JSON koji Bot očekuje
-                const dataToSend = JSON.stringify({
-                    action: "start_test",
-                    timestamp: new Date().toISOString()
-                });
-                
-                // KRITIČNA LINIJA: Slanje podataka Botu
-                Telegram.WebApp.sendData(dataToSend);
-
-                statusDiv.innerText = "Podaci poslati. Zatvaranje za 500ms.";
-
-                // DODATO KAŠNJENJE: Dajte Telegramu 500ms da obradi podatke pre zatvaranja.
-                setTimeout(() => {
-                    Telegram.WebApp.close(); 
-                }, 500);
-
-            } else {
-                statusDiv.innerText = "Greška: Mini App nije spreman za komunikaciju s Botom.";
-            }
-        }
+        // BITNO: NEMA POZIVA startTest() funkcije automatski!
     </script>
 </body>
 </html>
