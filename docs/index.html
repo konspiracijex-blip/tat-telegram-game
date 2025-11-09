@@ -75,8 +75,10 @@
         
         /* Podesavanje za glavni 'Next'/Pocetni taster */
         .main-button {
-            background-color: var(--tg-button-color);
-            color: var(--tg-button-text);
+            /* Crni taster */
+            background-color: #000000; 
+            color: #FFFFFF; 
+            
             border: none;
             padding: 15px;
             font-size: 18px;
@@ -136,19 +138,19 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
 
     <div id="start-screen">
-        <h1 style="text-align: center;">Tematski Appercepcioni Test</h1>
-        <p style="text-align: left; margin-bottom: 25px;">
-            **Svet koji poznaješ nije onakav kakvim ti ga prikazuju.**
+        <h1 style="text-align: center; font-size: 1.8em;">Tematski Appercepcioni Test</h1>
+        <p style="text-align: left; margin-bottom: 25px; color: var(--tg-text);">
+            Svet koji poznaješ nije onakav kakvim ti ga prikazuju.
             <br><br>
             Iza svake odluke, svake reči, svakog pogleda - krije se odraz tebe samog.
             <br>Ova igra nije običan test.
             <br>Nema tačnih odgovora, samo istiniti odrazi.
             <br>Na osnovu tvojih izbora, otkriće se ko si - i koliko duboko vidiš.
         </p>
-        <p style="color: var(--tg-theme-hint-color); text-align: left; font-size: 0.9em; margin-bottom: 30px;">
+        <p style="text-align: left; font-size: 0.9em; margin-bottom: 30px; color: var(--tg-text);">
             Test se zasniva na stvarnom Tematskom appercepcionom testu (TAT), korišćenom u vojnim i obaveštajnim psihološkim procenama. Svaka slika koju vidiš nosi simboliku, a svaki odgovor meri ono što ne možeš sakriti - način na koji gledaš svet.
             <br><br>
-            **Pazi šta biraš. Sistem pamti...**
+            Pazi šta biraš. Sistem pamti...
         </p>
         <button id="startButton" class="main-button" onclick="startQuiz()">
             POKRENI TEST
@@ -240,7 +242,7 @@
             "points": {"A": 3, "B": 4, "C": 2, "D": 1,}
         },
         6: {
-            "image_path": "https://i.postimg.cc/C5k49W7t/image-06.jpg", // ✅ ISPRAVLJEN LINK
+            "image_path": "https://i.postimg.cc/C5k49W7t/image-06.jpg", // ISPRAVLJEN LINK
             "text": "*Šta će sada uraditi?*",
             "full_options": {
                 "A": "Odlazi zauvek, ne osvrće se.",
@@ -324,7 +326,7 @@
             name: "Vizionar",
             title: "nosilac plamena koji tek dolazi",
             procena: "Ti ne samo da vidiš istinu — ti je osećaš.\nNe tražiš da se svet promeni. Ti si taj koji menja svet. Sistem te se ne plaši zbog onoga što znaš, već zbog onoga što možeš da pokreneš. Tvoje misli su ispred vremena, a tvoj pogled ne pripada ovom svetu.",
-            opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcioniše kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres. Oni su svetlost u tami — i tama to zna."
+            opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcioniše kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres.\\nOni su svetlost u tami — i tama to zna."
         }
     ];
 
@@ -363,6 +365,7 @@
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
         
+        // Uklanjamo zvezdice iz teksta pitanja
         document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
         document.getElementById('quiz-image').src = data.image_path;
         
@@ -419,7 +422,7 @@
         updateProgress(); // Postavlja traku na 100%
         Telegram.WebApp.MainButton.hide(); 
         
-        // 2. ✅ AUTOMATSKI ŠALJEMO REZULTAT botu za upis u bazu
+        // 2. AUTOMATSKI ŠALJEMO REZULTAT botu za upis u bazu
         sendFinalScore();
     }
 
@@ -434,7 +437,6 @@
         
         // Slanje rezultata za upis u Google Sheets
         Telegram.WebApp.sendData(jsonString); 
-        // Ne pozivamo close()
     }
     
     function showAdditionalText() {
@@ -465,7 +467,7 @@
             // Prvi klik prikazuje tekst i menja dugme. Sledeći klik zatvara App.
             button.onclick = Telegram.WebApp.close;
         } else {
-            // Ako je već prikazano, zatvaramo App (iako je onclick već redefinisan)
+            // Ako je već prikazano, zatvaramo App
             Telegram.WebApp.close(); 
         }
     }
