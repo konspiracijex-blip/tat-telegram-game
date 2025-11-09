@@ -8,76 +8,335 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
+        /* Telegram Theme Variables */
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #000000);
+            --tg-hint: var(--tg-theme-hint-color, #777777);
+            --tg-button-color: var(--tg-theme-button-color, #2481cc);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: var(--tg-bg); 
+            color: var(--tg-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 20px 0;
             text-align: center;
-            background-color: var(--tg-theme-bg-color, #ffffff); 
-            color: var(--tg-theme-text-color, #000000);
-            transition: background-color 0.3s, color 0.3s;
         }
-        h1 {
-            color: var(--tg-theme-text-color, #000000);
-            margin-bottom: 5px;
+
+        #quiz-image {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
-        p {
-            color: var(--tg-theme-hint-color, #777777);
-            margin-bottom: 30px;
+
+        #question-text {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 25px;
+            color: var(--tg-text);
         }
-        button {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 15px 30px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 18px;
+
+        .option-button {
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            border: 1px solid var(--tg-hint);
+            padding: 12px;
+            margin-bottom: 10px;
+            text-align: left;
+            font-size: 16px;
             cursor: pointer;
             border-radius: 8px;
-            width: 80%;
-            max-width: 300px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.1s, border-color 0.1s;
+        }
+
+        .option-button:hover {
+             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+        
+        /* Podesavanje za glavni 'Next'/Pocetni taster */
+        .main-button {
+            background-color: var(--tg-button-color);
+            color: var(--tg-button-text);
+            border: none;
+            padding: 15px;
+            font-size: 18px;
             font-weight: bold;
-            transition: background-color 0.2s;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 30px;
         }
-        button:active {
-            opacity: 0.8;
+
+        #start-screen, #quiz-screen, #end-screen {
+            display: none;
+            width: 100%;
         }
-        .main-message {
-            margin-top: 40px;
-            font-size: 1.1em;
+
+        #progress-bar {
+            width: 100%;
+            background-color: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            height: 8px;
         }
+
+        #progress-fill {
+            height: 8px;
+            background-color: var(--tg-button-color);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1 class="main-message">TAT Test</h1>
-    <p>Ovo je eksperimentalni test.</p>
+<div class="container">
+    <div id="progress-bar"><div id="progress-fill"></div></div>
 
-    <button id="startButton" onclick="startTest()">
-        🏁 Pokreni Kviz
-    </button>
-    
-    <p style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
+    <div id="start-screen">
+        <h1>Tematski Appercepcioni Test</h1>
+        <p style="color: var(--tg-theme-hint-color);">Ovaj test se ne bavi znanjem, već vašom percepcijom. Odaberite ono što vam prvo padne na pamet.</p>
+        <button id="startButton" class="main-button" onclick="startQuiz()">
+            🏁 Pokreni Test (10 Pitanja)
+        </button>
+    </div>
 
-    <script>
-        // Inicijalizacija Web App
-        Telegram.WebApp.ready();
+    <div id="quiz-screen">
+        <img id="quiz-image" src="" alt="TAT Image">
+        <p id="question-text"></p>
+        <div id="options-container">
+            </div>
+    </div>
 
-        Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
-        
-        // Funkcija koja se pokreće klikom na dugme
-        function startTest() {
-            const dataToSend = {
-                "action": "start_test"
-            };
-            
-            const jsonString = JSON.stringify(dataToSend);
-            
-            // Koristimo close() sa Query Data. Prozor se zatvara, podaci se šalju.
-            Telegram.WebApp.close(jsonString); 
+    <div id="end-screen">
+        <h1>Test Završen!</h1>
+        <p>Hvala Vam što ste učestvovali. Vaš rezultat je izračunat. Kliknite ispod da biste dobili svoj profil u bot chatu.</p>
+        <button id="finishButton" class="main-button" onclick="sendFinalScore()">
+            Prikaži Moj Profil
+        </button>
+    </div>
+</div>
+
+<script>
+    Telegram.WebApp.ready();
+    Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
+
+    // ✅ Sva pitanja i bodovi su prebačeni u JavaScript
+    const QUESTIONS_DATA = {
+        1: {
+            "image_path": "https://i.postimg.cc/Xv3QTq0W/image-01.jpg",
+            "text": "*Šta se ovde dešava?*",
+            "full_options": {
+                "A": "Muškarac analizira tajni dokument. Deluje kao islednik.",
+                "B": "On gleda u nešto što ga plaši. Možda je otkrio istinu koju nije smeo da vidi.",
+                "C": "To je naučnik koji proučava dokaz o postojanju nečeg nadprirodnog.",
+                "D": "Čovek je sam sa sobom. Papir ispred njega je samo izgovor.",
+            },
+            "points": {"A": 2, "B": 3, "C": 4, "D": 5,}
+        },
+        2: {
+            "image_path": "https://i.postimg.cc/nzVdXvBq/image-02.jpg",
+            "text": "*Šta vidiš na ovoj slici?*",
+            "full_options": {
+                "A": "Žena čeka nekoga. Možda prijatelja.",
+                "B": "Neko je posmatra iz senke. Oseća da nije sama.",
+                "C": "Između njih postoji nevidiva veza – kao da se prepoznaju i bez reči.",
+                "D": "To nije susret – to je ogledalo. Ona vidi sebe u tami.",
+            },
+            "points": {"A": 1, "B": 3, "C": 4, "D": 5,}
+        },
+        3: {
+            "image_path": "https://i.postimg.cc/76trgbfM/image-03.jpg",
+            "text": "*Šta se ovde upravo dogodilo?*",
+            "full_options": {
+                "A": "Neko je naglo otišao. Posvađali su se.",
+                "B": "Pismo na stolu sadrži istinu koju je neko dugo krio.",
+                "C": "Ovo je trenutak posle priznanja. Tišina između dvoje ljudi postala je nepodnošljiva.",
+                "D": "Nikoga ovde nije bilo. Sve je samo sećanje koje soba pamti.",
+            },
+            "points": {"A": 2, "B": 3, "C": 4, "D": 5,}
+        },
+        4: {
+            "image_path": "https://i.postimg.cc/VsRP9Gb9/image-04.jpg",
+            "text": "*Šta misliš da se dešava?*",
+            "full_options": {
+                "A": "On ulazi, spreman da se suoči s onim što ga čeka.",
+                "B": "On zatvara vrata za sobom, zauvek.",
+                "C": "Okleva, jer zna da odluka menja sve.",
+                "D": "Vrata ne vode nigde – to su vrata njegovog uma.",
+            },
+            "points": {"A": 3, "B": 2, "C": 1, "D": 4,}
+        },
+        5: {
+            "image_path": "https://i.postimg.cc/fRZ0H4mG/image-05.jpg",
+            "text": "*Šta sada zna?*",
+            "full_options": {
+                "A": "Shvata da je sve bilo laž.",
+                "B": "Razume da je i sam deo onoga što je pokušavao da otkrije.",
+                "C": "Konačno dobija potvrdu da je bio u pravu.",
+                "D": "Nije siguran u ono što vidi – možda to uopšte nije istina.",
+            },
+            "points": {"A": 3, "B": 4, "C": 2, "D": 1,}
+        },
+        6: {
+            "image_path": "https://i.postimg.cc/C5k49W3t/image-06.jpg",
+            "text": "*Šta će sada uraditi?*",
+            "full_options": {
+                "A": "Odlazi zauvek, ne osvrće se.",
+                "B": "Pali dokument i okreće se novom početku.",
+                "C": "Stoji u tišini, jer zna da nema povratka.",
+                "D": "Vraća se tamo odakle je sve počelo.",
+            },
+            "points": {"A": 2, "B": 3, "C": 1, "D": 4,}
+        },
+        7: {
+            "image_path": "https://i.postimg.cc/Zn8M69Gn/image-07.jpg",
+            "text": "*Koga vidi u ogledalu?*",
+            "full_options": {
+                "A": "Sebe, ali drugačijeg nego ranije.",
+                "B": "Osobu koja ga je izdala.",
+                "C": "Nekog koga ne poznaje.",
+                "D": "Nikoga – ogledalo je prazno.",
+            },
+            "points": {"A": 3, "B": 2, "C": 4, "D": 1,}
+        },
+        8: {
+            "image_path": "https://i.postimg.cc/MH0zXpd2/image-08.jpg",
+            "text": "*Šta sada misli o svetu?*",
+            "full_options": {
+                "A": "Svet je samo sistem koji jede sopstvenu decu.",
+                "B": "Svet je haotičan, ali u haosu ima istine.",
+                "C": "Svet je uvek bio takav – mi smo se promenili.",
+                "D": "Svet je spašen ako se pojedinac promeni.",
+            },
+            "points": {"A": 3, "B": 4, "C": 2, "D": 1,}
+        },
+        9: {
+            "image_path": "https://i.postimg.cc/L4Gy8VZN/image-09.jpg",
+            "text": "*Kome će pripasti?*",
+            "full_options": {
+                "A": "Onome kto drži istinu, makar bila bolna.",
+                "B": "Onome ko ima moć da održi red.",
+                "C": "Nikome – put istine je usamljen.",
+                "D": "Onome ko ćuti, jer samo tihi prežive.",
+            },
+            "points": {"A": 4, "B": 2, "C": 3, "D": 1,}
+        },
+        10: {
+            "image_path": "https://i.postimg.cc/QMrGK392/image-10.jpg",
+            "text": "*Šta nosi sa sobom?*",
+            "full_options": {
+                "A": "Ništa – jer sve što treba, izgubljeno je.",
+                "B": "Svoje misli – jedino što niko ne može uzeti.",
+                "C": "Istinu – čak i ako je niko ne želi čuti.",
+                "D": "Tišinu – jer samo ona razume ono što je bilo.",
+            },
+            "points": {"A": 1, "B": 3, "C": 4, "D": 2,}
         }
-    </script>
+    };
+    
+    // Globalne varijable stanja
+    let currentQuestionNum = 0;
+    let totalScore = 0;
+    const TOTAL_QUESTIONS = Object.keys(QUESTIONS_DATA).length;
+    
+    function showScreen(screenId) {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+        document.getElementById(screenId).style.display = 'block';
+    }
+
+    function updateProgress() {
+        const progress = (currentQuestionNum / TOTAL_QUESTIONS) * 100;
+        document.getElementById('progress-fill').style.width = progress + '%';
+        document.getElementById('progress-bar').style.display = currentQuestionNum > 0 && currentQuestionNum <= TOTAL_QUESTIONS ? 'block' : 'none';
+    }
+
+    function startQuiz() {
+        currentQuestionNum = 1;
+        totalScore = 0;
+        showScreen('quiz-screen');
+        displayQuestion(currentQuestionNum);
+    }
+
+    function displayQuestion(qNum) {
+        if (qNum > TOTAL_QUESTIONS) {
+            return endQuiz();
+        }
+
+        const data = QUESTIONS_DATA[qNum];
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = ''; // Cisti prethodne opcije
+        
+        // Prikazuje redni broj i tekst pitanja
+        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
+        document.getElementById('quiz-image').src = data.image_path;
+        
+        // Kreiranje dugmadi za odgovore
+        let optionsHtml = '';
+        for (const [key, text] of Object.entries(data.full_options)) {
+            optionsHtml += `<button class="option-button" data-key="${key}" onclick="handleAnswer('${key}', ${qNum})">**${key}:** ${text}</button>`;
+        }
+        optionsContainer.innerHTML = optionsHtml;
+
+        updateProgress();
+    }
+
+    function handleAnswer(answerKey, qNum) {
+        const questionData = QUESTIONS_DATA[qNum];
+        
+        // Dodavanje bodova
+        const points = questionData.points[answerKey];
+        totalScore += points;
+        
+        // Prikazivanje selektovanog odgovora (opciono, samo za povratnu informaciju)
+        console.log(`Pitanje ${qNum}, Odgovor ${answerKey}, Bodovi: ${points}. Ukupno: ${totalScore}`);
+
+        // Prelazak na sledeće pitanje
+        currentQuestionNum++;
+        displayQuestion(currentQuestionNum);
+    }
+
+    function endQuiz() {
+        showScreen('end-screen');
+        updateProgress(); // Postavlja traku na 100%
+        Telegram.WebApp.MainButton.hide(); // Sakriva glavni taster (ako je bio prikazan)
+    }
+
+    function sendFinalScore() {
+        const dataToSend = {
+            "action": "final_score",
+            "score": totalScore
+        };
+        
+        const jsonString = JSON.stringify(dataToSend);
+        
+        // ✅ Koristimo close() sa Query Data, što je jedini pouzdan signal
+        Telegram.WebApp.close(jsonString); 
+    }
+    
+    // Prikazuje početni ekran pri učitavanju
+    showScreen('start-screen');
+    updateProgress();
+</script>
 </body>
 </html>
