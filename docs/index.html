@@ -70,16 +70,19 @@
         
         // Funkcija koja se pokreće klikom na dugme
         function startTest() {
-            // Objekat koji šaljemo botu (bot ga obrađuje u handle_web_app_data)
+            // Objekat koji šaljemo botu
             const dataToSend = {
                 "action": "start_test"
             };
             
-            // Slanje JSON stringa nazad botu. 
-            // Ova komanda bi trebalo da automatski ZATVORI Web App
-            Telegram.WebApp.sendData(JSON.stringify(dataToSend));
+            // Konvertovanje objekta u JSON string
+            const jsonString = JSON.stringify(dataToSend);
             
-            // Dodatna sigurnosna provera za ručno zatvaranje, ako sendData ne uspe da zatvori odmah
+            // Slanje JSON stringa botu. 
+            // Ova funkcija ujedno zatvara Web App.
+            Telegram.WebApp.sendData(jsonString);
+            
+            // Dodatna sigurnosna provera za ručno zatvaranje, za svaki slučaj
             setTimeout(() => {
                 Telegram.WebApp.close();
             }, 500); 
