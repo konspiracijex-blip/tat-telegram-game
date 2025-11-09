@@ -363,4 +363,116 @@
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
         
-        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum
+        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
+        document.getElementById('quiz-image').src = data.image_path;
+        
+        let optionsHtml = '';
+        for (const [key, text] of Object.entries(data.full_options)) {
+            optionsHtml += `<button class="option-button" data-key="${key}" onclick="handleAnswer('${key}', ${qNum})">**${key}:** ${text}</button>`;
+        }
+        optionsContainer.innerHTML = optionsHtml;
+
+        updateProgress();
+    }
+
+    function handleAnswer(answerKey, qNum) {
+        const questionData = QUESTIONS_DATA[qNum];
+        
+        const points = questionData.points[answerKey];
+        totalScore += points;
+        
+        currentQuestionNum++;
+        displayQuestion(currentQuestionNum);
+    }
+
+    function getProfileByScore(score) {
+        score = Math.max(10, Math.min(40, score));
+        for (const profile of SCORE_PROFILES) {
+            if (score >= profile.range[0] && score <= profile.range[1]) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+    function displayProfile(score) {
+        const profileData = getProfileByScore(score);
+        
+        // Uklonjen: document.getElementById('score-display').textContent = `VAŠ SKOR: ${score}/40`;
+
+        if (profileData) {
+            document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
+            // Zamena novih redova u tekstu za HTML prikaz
+            document.getElementById('profile-procena').innerHTML = `**PROCENA:**<br>${profileData.procena.replace(/\n/g, '<br>')}`;
+            document.getElementById('profile-opis').innerHTML = `**OPIS:**<br>${profileData.opis.replace(/\n/g, '<br>')}`;
+        } else {
+            document.getElementById('profile-name').textContent = "Greška pri pronalaženju profila";
+            document.getElementById('profile-procena').textContent = "";
+            document.getElementById('profile-opis').textContent = "";
+        }
+    }
+
+    function endQuiz() {
+        // 1. Prikazuje profil
+        displayProfile(totalScore);
+        showScreen('end-screen');
+        updateProgress(); // Postavlja traku na 100%
+        Telegram.WebApp.MainButton.hide(); 
+        
+        // 2. ✅ AUTOMATSKI ŠALJEMO REZULTAT botu za upis u bazu
+        sendFinalScore();
+    }
+
+    function sendFinalScore() {
+        // Ne zatvaramo WebApp odmah, samo šaljemo podatke za upis u bazu
+        const dataToSend = {
+            "action": "final_score",
+            "score": totalScore.toString() 
+        };
+        
+        const jsonString = JSON.stringify(dataToSend);
+        
+        // Slanje rezultata za upis u Google Sheets
+        Telegram.WebApp.sendData(jsonString); 
+        // Ne pozivamo close()
+    }
+    
+    function showAdditionalText() {
+        const container = document.getElementById('additional-text-container');
+        const content = document.getElementById('additional-text-content');
+        const button = document.getElementById('additionalButton');
+        
+        const text = `
+            Svako ogledalo pokazuje ono što već postoji u nama.<br><br>
+            Nema boljih i gorih, samo onih koji su spremni da vide - i onih koji još uvek uče da gledaju.<br>
+            Tvoj izbor, tvoje reči i tvoja tišina oblikuju svet više nego što misliš.<br>
+            U vremenu koje dolazi, biće potrebni i oni koji sumnjaju, i oni koji veruju, i oni koji se bore.<br><br>
+            Jer istina se ne rađa iz sile - već iz svesti.<br>
+            Svet se menja kada se promene oni koji ga nose.<br>
+            I zato - ne plaši se onoga što si video.<br><br>
+            Plaši se onoga što bi moglo ostati neviđeno.
+        `;
+        
+        const channelLink = `
+            <br><br>
+            Kanal “<a href="https://t.me/konspiracije" target="_blank" style="color: var(--tg-button-color); text-decoration: none;">Konspiracije</a>” nastavlja da traži one koji gledaju dublje.
+        `;
+
+        if (container.style.display === 'none') {
+            content.innerHTML = text + channelLink;
+            container.style.display = 'block';
+            button.textContent = "Zatvori Web App"; 
+            // Prvi klik prikazuje tekst i menja dugme. Sledeći klik zatvara App.
+            button.onclick = Telegram.WebApp.close;
+        } else {
+            // Ako je već prikazano, zatvaramo App (iako je onclick već redefinisan)
+            Telegram.WebApp.close(); 
+        }
+    }
+    
+    // Prikazuje početni ekran pri učitavanju
+    showScreen('start-screen');
+    updateProgress();
+</script>
+</body>
+</html>
