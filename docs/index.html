@@ -22,7 +22,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            /* ✅ CRNA POZADINA ZA CELU IGRU */
+            /* CRNA POZADINA ZA CELU IGRU */
             background-color: #000000; 
             color: var(--tg-text);
             display: flex;
@@ -75,7 +75,7 @@
              background-color: var(--tg-secondary-bg);
         }
         
-        /* ✅ STIL ZA GLAVNE TASTERE (CRNA POZADINA, BELI OUTLINE) */
+        /* ✅ STIL ZA GLAVNE TASTERE (POKRENI TEST, KRAJ) */
         .main-button {
             background-color: #000000; /* Crna */
             color: #FFFFFF; /* Beli tekst */
@@ -90,7 +90,7 @@
             margin-top: 30px;
         }
 
-        #start-screen, #quiz-screen, #end-screen {
+        #start-screen, #quiz-screen, #end-screen, #timeout-screen {
             display: none;
             width: 100%;
             text-align: left; 
@@ -115,6 +115,34 @@
              border-top: 1px solid var(--tg-hint);
         }
 
+        /* ✅ STIL ZA TAJMER LINIJU */
+        #timer-line {
+            width: 100%;
+            height: 2px; /* 2 piksela debela */
+            background-color: red; /* Crvena boja */
+            margin-bottom: 25px; /* Razmak ispod linije */
+            /* Tranzicija se postavlja JS-om */
+        }
+
+        /* ✅ STIL ZA EKRAN ISTEKLOG VREMENA */
+        #timeout-screen {
+            display: none;
+            width: 100%;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        #timeout-screen h1 {
+            color: var(--tg-text);
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        #timeout-screen p {
+            color: red;
+            font-size: 1.2em; 
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
 
         #progress-bar {
             width: 100%;
@@ -161,6 +189,9 @@
 
     <div id="quiz-screen">
         <img id="quiz-image" src="" alt="TAT Image">
+        
+        <div id="timer-line"></div> 
+        
         <p id="question-text"></p>
         <div id="options-container">
             </div>
@@ -180,13 +211,25 @@
             DODATAK
         </button>
     </div>
+
+    <div id="timeout-screen">
+        <h1>VREME ZA ODGOVOR JE ISTEKLO.</h1>
+        <p>NISTE PROŠLI TEST</p>
+        <button id="restartButton" class="main-button" onclick="startQuiz()">
+            POKRENI TEST
+        </button>
+    </div>
 </div>
 
 <script>
     Telegram.WebApp.ready();
     Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
 
-    // ✅ Pitanja i Bodovi
+    // ✅ GLOBALNE VARIJABLE ZA TAJMER
+    const TIME_LIMIT = 40000; // 40 sekundi
+    let timerId = null; 
+
+    // Pitanja i Bodovi...
     const QUESTIONS_DATA = {
         1: {
             "image_path": "https://i.postimg.cc/Xv3QTq0W/image-01.jpg",
@@ -244,7 +287,7 @@
             "points": {"A": 3, "B": 4, "C": 2, "D": 1,}
         },
         6: {
-            "image_path": "https://i.postimg.cc/C5k49W7t/image-06.jpg", // ISPRAVLJEN LINK
+            "image_path": "https://i.postimg.cc/C5k49W7t/image-06.jpg", 
             "text": "*Šta će sada uraditi?*",
             "full_options": {
                 "A": "Odlazi zauvek, ne osvrće se.",
@@ -300,7 +343,6 @@
         }
     };
 
-    // ✅ PROFILI PREBAČENI U JS
     const SCORE_PROFILES = [
         {
             range: [10, 17],
@@ -342,19 +384,67 @@
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'none';
         document.getElementById('end-screen').style.display = 'none';
+        document.getElementById('timeout-screen').style.display = 'none'; /* Dodato */
         document.getElementById(screenId).style.display = 'block';
     }
 
     function updateProgress() {
         const progress = (currentQuestionNum / TOTAL_QUESTIONS) * 100;
         document.getElementById('progress-fill').style.width = progress + '%';
+        // Prikazuje progress bar samo tokom kviza
         document.getElementById('progress-bar').style.display = currentQuestionNum > 0 && currentQuestionNum <= TOTAL_QUESTIONS ? 'block' : 'none';
     }
+
+    /* -------------------------------------------------------------------------- */
+    /* TAJMER LOGIKA                              */
+    /* -------------------------------------------------------------------------- */
+    
+    // Funkcija koja se poziva kada vreme istekne
+    function handleTimeout() {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+        
+        // Sakrivamo progress bar za pitanja
+        document.getElementById('progress-bar').style.display = 'none';
+
+        // Prikazujemo ekran za neuspeh
+        showScreen('timeout-screen');
+    }
+    
+    // Funkcija koja pokreće vizuelni tajmer
+    function startTimer() {
+        // Resetovanje prethodnog tajmera
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+
+        const timerLine = document.getElementById('timer-line');
+        // 1. Resetujemo širinu na 100% i isključujemo tranziciju za brzi reset
+        timerLine.style.transition = 'none';
+        timerLine.style.width = '100%'; 
+        
+        // Prinudno reflow-ovanje da se reset vizuelno primeni
+        // eslint-disable-next-line no-unused-expressions
+        timerLine.offsetHeight; 
+        
+        // 2. Pokrećemo tranziciju na 40 sekundi ka 0% širine
+        timerLine.style.transition = `width ${TIME_LIMIT / 1000}s linear`;
+        timerLine.style.width = '0%'; 
+        
+        // 3. Postavljanje timeout-a
+        timerId = setTimeout(handleTimeout, TIME_LIMIT);
+    }
+    /* -------------------------------------------------------------------------- */
+
 
     function startQuiz() {
         currentQuestionNum = 1;
         totalScore = 0;
         showScreen('quiz-screen');
+        // Prikazujemo progress bar ponovo 
+        document.getElementById('progress-bar').style.display = 'block'; 
         displayQuestion(currentQuestionNum);
     }
 
@@ -363,12 +453,15 @@
             return endQuiz();
         }
 
+        // ✅ NOVO: Pokretanje tajmera pri svakom pitanju
+        startTimer(); 
+        
         const data = QUESTIONS_DATA[qNum];
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
         
-        // Uklanjamo zvezdice iz teksta pitanja
-        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
+        // Pitanje 1/10 je sada samo deo progres bara, ovde ostaje samo tekst pitanja
+        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}:** ${data.text.replace(/\*/g, '')}`; 
         document.getElementById('quiz-image').src = data.image_path;
         
         let optionsHtml = '';
@@ -381,6 +474,12 @@
     }
 
     function handleAnswer(answerKey, qNum) {
+        // ✅ OBAVEZNO BRISANJE TAJMERA
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+        
         const questionData = QUESTIONS_DATA[qNum];
         
         const points = questionData.points[answerKey];
@@ -405,7 +504,6 @@
         
         if (profileData) {
             document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
-            // Zamena novih redova u tekstu za HTML prikaz
             document.getElementById('profile-procena').innerHTML = `**PROCENA:**<br>${profileData.procena.replace(/\n/g, '<br>')}`;
             document.getElementById('profile-opis').innerHTML = `**OPIS:**<br>${profileData.opis.replace(/\n/g, '<br>')}`;
         } else {
@@ -416,13 +514,16 @@
     }
 
     function endQuiz() {
-        // 1. Prikazuje profil
+        // Obavezno brisanje tajmera pre kraja
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+
         displayProfile(totalScore);
         showScreen('end-screen');
-        updateProgress(); // Postavlja traku na 100%
+        updateProgress(); 
         Telegram.WebApp.MainButton.hide(); 
-        
-        // 2. AUTOMATSKI ŠALJEMO REZULTAT botu za upis u bazu
         sendFinalScore();
     }
 
@@ -433,8 +534,6 @@
         };
         
         const jsonString = JSON.stringify(dataToSend);
-        
-        // Slanje rezultata za upis u Google Sheets
         Telegram.WebApp.sendData(jsonString); 
     }
     
@@ -462,7 +561,7 @@
 
         if (container.style.display === 'none') {
             
-            // ✅ BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
+            // BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
             document.getElementById('profile-name').style.display = 'none';
             document.getElementById('profile-procena').style.display = 'none';
             document.getElementById('profile-opis').style.display = 'none';
@@ -472,7 +571,7 @@
             content.innerHTML = text + channelLink;
             container.style.display = 'block';
             
-            // ✅ Promena teksta dugmeta u "KRAJ"
+            // Promena teksta dugmeta u "KRAJ"
             button.textContent = "KRAJ"; 
             
             // Re-definišemo akciju dugmeta na zatvaranje App-a
