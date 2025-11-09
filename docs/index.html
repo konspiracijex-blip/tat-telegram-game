@@ -50,7 +50,7 @@
             font-weight: 500;
             margin-bottom: 25px;
             color: var(--tg-text);
-            text-align: left; /* Poravnanje za pitanja */
+            text-align: left;
             width: 100%;
         }
 
@@ -89,7 +89,7 @@
         #start-screen, #quiz-screen, #end-screen {
             display: none;
             width: 100%;
-            text-align: left; /* Profil tekst se bolje čita levo poravnat */
+            text-align: left; 
         }
         
         #end-screen h2 {
@@ -104,11 +104,11 @@
             padding: 0 5px;
         }
         
-        .score-info {
-            text-align: center;
-            font-weight: bold;
-            color: var(--tg-hint);
-            margin-bottom: 30px;
+        #additional-text-container {
+             text-align: left;
+             margin-top: 30px; 
+             padding: 20px 0; 
+             border-top: 1px solid var(--tg-hint);
         }
 
 
@@ -137,9 +137,21 @@
 
     <div id="start-screen">
         <h1 style="text-align: center;">Tematski Appercepcioni Test</h1>
-        <p style="color: var(--tg-theme-hint-color); text-align: center;">Ovaj test se ne bavi znanjem, već vašom percepcijom. Odaberite ono što vam prvo padne na pamet.</p>
+        <p style="text-align: left; margin-bottom: 25px;">
+            **Svet koji poznaješ nije onakav kakvim ti ga prikazuju.**
+            <br><br>
+            Iza svake odluke, svake reči, svakog pogleda - krije se odraz tebe samog.
+            <br>Ova igra nije običan test.
+            <br>Nema tačnih odgovora, samo istiniti odrazi.
+            <br>Na osnovu tvojih izbora, otkriće se ko si - i koliko duboko vidiš.
+        </p>
+        <p style="color: var(--tg-theme-hint-color); text-align: left; font-size: 0.9em; margin-bottom: 30px;">
+            Test se zasniva na stvarnom Tematskom appercepcionom testu (TAT), korišćenom u vojnim i obaveštajnim psihološkim procenama. Svaka slika koju vidiš nosi simboliku, a svaki odgovor meri ono što ne možeš sakriti - način na koji gledaš svet.
+            <br><br>
+            **Pazi šta biraš. Sistem pamti...**
+        </p>
         <button id="startButton" class="main-button" onclick="startQuiz()">
-            🏁 Pokreni Test (10 Pitanja)
+            POKRENI TEST
         </button>
     </div>
 
@@ -153,12 +165,15 @@
     <div id="end-screen">
         <h1 style="text-align: center;">Test Završen!</h1>
         <h2 id="profile-name"></h2>
-        <div class="score-info" id="score-display"></div>
         <p id="profile-procena" style="font-style: italic;"></p>
         <p id="profile-opis"></p>
         
-        <button id="finishButton" class="main-button" onclick="sendFinalScore()">
-            Zatvori Web App (Upis u bazu)
+        <div id="additional-text-container" style="display:none; margin-top: 30px; padding: 20px 0; border-top: 1px solid var(--tg-hint);">
+            <p id="additional-text-content" style="font-size: 0.95em;"></p>
+        </div>
+
+        <button id="additionalButton" class="main-button" onclick="showAdditionalText()">
+            DODATAK
         </button>
     </div>
 </div>
@@ -169,7 +184,6 @@
 
     // ✅ Pitanja i Bodovi
     const QUESTIONS_DATA = {
-        // ... (VAŠA PITANJA OD 1 DO 10 OSTAVLJENA OVDE BEZ PROMENE)
         1: {
             "image_path": "https://i.postimg.cc/Xv3QTq0W/image-01.jpg",
             "text": "*Šta se ovde dešava?*",
@@ -226,7 +240,7 @@
             "points": {"A": 3, "B": 4, "C": 2, "D": 1,}
         },
         6: {
-            "image_path": "https://i.postimg.cc/C5k49W3t/image-06.jpg",
+            "image_path": "https://i.postimg.cc/C5k49W7t/image-06.jpg", // ✅ ISPRAVLJEN LINK
             "text": "*Šta će sada uraditi?*",
             "full_options": {
                 "A": "Odlazi zauvek, ne osvrće se.",
@@ -349,82 +363,4 @@
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
         
-        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
-        document.getElementById('quiz-image').src = data.image_path;
-        
-        let optionsHtml = '';
-        for (const [key, text] of Object.entries(data.full_options)) {
-            optionsHtml += `<button class="option-button" data-key="${key}" onclick="handleAnswer('${key}', ${qNum})">**${key}:** ${text}</button>`;
-        }
-        optionsContainer.innerHTML = optionsHtml;
-
-        updateProgress();
-    }
-
-    function handleAnswer(answerKey, qNum) {
-        const questionData = QUESTIONS_DATA[qNum];
-        
-        const points = questionData.points[answerKey];
-        totalScore += points;
-        
-        currentQuestionNum++;
-        displayQuestion(currentQuestionNum);
-    }
-
-    function getProfileByScore(score) {
-        // Osiguravamo da je rezultat unutar opsega [10, 40]
-        score = Math.max(10, Math.min(40, score));
-        for (const profile of SCORE_PROFILES) {
-            if (score >= profile.range[0] && score <= profile.range[1]) {
-                return profile;
-            }
-        }
-        return null;
-    }
-
-    function displayProfile(score) {
-        const profileData = getProfileByScore(score);
-        
-        document.getElementById('score-display').textContent = `VAŠ SKOR: ${score}/40`;
-
-        if (profileData) {
-            document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
-            // Zamena novih redova u tekstu za HTML prikaz
-            document.getElementById('profile-procena').innerHTML = `**PROCENA:**<br>${profileData.procena.replace(/\n/g, '<br>')}`;
-            document.getElementById('profile-opis').innerHTML = `**OPIS:**<br>${profileData.opis.replace(/\n/g, '<br>')}`;
-        } else {
-            document.getElementById('profile-name').textContent = "Greška pri pronalaženju profila";
-            document.getElementById('profile-procena').textContent = "";
-            document.getElementById('profile-opis').textContent = "";
-        }
-    }
-
-    function endQuiz() {
-        // Prikazuje profil i ekran
-        displayProfile(totalScore);
-        showScreen('end-screen');
-        updateProgress();
-        Telegram.WebApp.MainButton.hide(); 
-    }
-
-    function sendFinalScore() {
-        const dataToSend = {
-            "action": "final_score",
-            "score": totalScore.toString() 
-        };
-        
-        const jsonString = JSON.stringify(dataToSend);
-        
-        // Slanje rezultata za upis u Google Sheets
-        Telegram.WebApp.sendData(jsonString); 
-        
-        // Zatvaranje Web App-a
-        Telegram.WebApp.close(); 
-    }
-    
-    // Prikazuje početni ekran pri učitavanju
-    showScreen('start-screen');
-    updateProgress();
-</script>
-</body>
-</html>
+        document.getElementById('question-text').innerHTML = `**Pitanje ${qNum
