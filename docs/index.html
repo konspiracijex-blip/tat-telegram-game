@@ -97,9 +97,20 @@
         }
         
         #end-screen h2 {
+            /* Stil za Ime profila (npr. VIZIONAR) */
             text-align: center;
             color: var(--tg-button-color);
-            margin-bottom: 20px;
+            margin-bottom: 10px; /* Smanjen razmak pre naslova */
+        }
+        /* NOVI STIL ZA NASLOV PROFILA (TITLE) */
+        #end-screen h3 { 
+            text-align: center;
+            color: var(--tg-text);
+            font-style: italic;
+            font-size: 1.1em; 
+            margin-top: 0; 
+            margin-bottom: 30px; /* Razmak ispod naslova */
+            font-weight: normal;
         }
         
         #end-screen p {
@@ -200,6 +211,7 @@
     <div id="end-screen">
         <h1 style="text-align: center;">Test Završen!</h1>
         <h2 id="profile-name"></h2>
+        <h3 id="profile-title"></h3> 
         <p id="profile-procena" style="font-style: italic;"></p>
         <p id="profile-opis"></p>
         
@@ -323,7 +335,6 @@
             "image_path": "https://i.postimg.cc/L4Gy8VZN/image-09.jpg",
             "text": "*Kome će pripasti?*",
             "full_options": {
-                // ✅ ISPRAVLJENO: "kto" u "ko"
                 "A": "Onome ko drži istinu, makar bila bolna.",
                 "B": "Onome ko ima moć da održi red.",
                 "C": "Nikome – put istine je usamljen.",
@@ -370,7 +381,7 @@
             range: [33, 40],
             name: "Vizionar",
             title: "nosilac plamena koji tek dolazi",
-            procena: "Ti ne samo da vidiš istinu — ti je osećaš.\nNe tražiš da se svet promeni. Ti si taj koji menja svet. Sistem te se ne plaši zbog onoga što znaš, već zbog onoga što možeš da pokreneš. Tvoje misli su ispred vremena, a tvoj pogled ne pripada ovom svetu.",
+            procena: "Ti ne samo da vidiš istinu — ti je osećaš.\nNe tražiš da se svet promeni. Ti si taj koji menja svet.\nSistem te se ne plaši zbog onoga što znaš, već zbog onoga što možeš da pokreneš.\nTvoje misli su ispred vremena, a tvoj pogled ne pripada ovom svetu.",
             opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcioniše kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres.\\nOni su svetlost u tami — i tama to zna."
         }
     ];
@@ -499,11 +510,15 @@
         const profileData = getProfileByScore(score);
         
         if (profileData) {
-            document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
+            // ✅ IZMENA: Razdvajanje naziva i naslova u dva elementa
+            document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()}`; 
+            document.getElementById('profile-title').textContent = profileData.title; 
+            
             document.getElementById('profile-procena').innerHTML = `**PROCENA:**<br>${profileData.procena.replace(/\n/g, '<br>')}`;
             document.getElementById('profile-opis').innerHTML = `**OPIS:**<br>${profileData.opis.replace(/\n/g, '<br>')}`;
         } else {
             document.getElementById('profile-name').textContent = "Greška pri pronalaženju profila";
+            document.getElementById('profile-title').textContent = "";
             document.getElementById('profile-procena').textContent = "";
             document.getElementById('profile-opis').textContent = "";
         }
@@ -558,6 +573,7 @@
             
             // BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
             document.getElementById('profile-name').style.display = 'none';
+            document.getElementById('profile-title').style.display = 'none'; // Sakrivanje naslova
             document.getElementById('profile-procena').style.display = 'none';
             document.getElementById('profile-opis').style.display = 'none';
             endScreen.querySelector('h1').style.display = 'none'; 
