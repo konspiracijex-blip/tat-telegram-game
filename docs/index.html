@@ -15,6 +15,7 @@
             --tg-hint: var(--tg-theme-hint-color, #777777);
             --tg-button-color: var(--tg-theme-button-color, #2481cc);
             --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
         }
 
         body {
@@ -49,6 +50,8 @@
             font-weight: 500;
             margin-bottom: 25px;
             color: var(--tg-text);
+            text-align: left; /* Poravnanje za pitanja */
+            width: 100%;
         }
 
         .option-button {
@@ -67,7 +70,7 @@
         }
 
         .option-button:hover {
-             background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+             background-color: var(--tg-secondary-bg);
         }
         
         /* Podesavanje za glavni 'Next'/Pocetni taster */
@@ -86,11 +89,32 @@
         #start-screen, #quiz-screen, #end-screen {
             display: none;
             width: 100%;
+            text-align: left; /* Profil tekst se bolje čita levo poravnat */
         }
+        
+        #end-screen h2 {
+            text-align: center;
+            color: var(--tg-button-color);
+            margin-bottom: 20px;
+        }
+        
+        #end-screen p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+            padding: 0 5px;
+        }
+        
+        .score-info {
+            text-align: center;
+            font-weight: bold;
+            color: var(--tg-hint);
+            margin-bottom: 30px;
+        }
+
 
         #progress-bar {
             width: 100%;
-            background-color: var(--tg-theme-secondary-bg-color, #e0e0e0);
+            background-color: var(--tg-secondary-bg);
             border-radius: 4px;
             margin-bottom: 20px;
             height: 8px;
@@ -112,8 +136,8 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
 
     <div id="start-screen">
-        <h1>Tematski Appercepcioni Test</h1>
-        <p style="color: var(--tg-theme-hint-color);">Ovaj test se ne bavi znanjem, već vašom percepcijom. Odaberite ono što vam prvo padne na pamet.</p>
+        <h1 style="text-align: center;">Tematski Appercepcioni Test</h1>
+        <p style="color: var(--tg-theme-hint-color); text-align: center;">Ovaj test se ne bavi znanjem, već vašom percepcijom. Odaberite ono što vam prvo padne na pamet.</p>
         <button id="startButton" class="main-button" onclick="startQuiz()">
             🏁 Pokreni Test (10 Pitanja)
         </button>
@@ -127,10 +151,14 @@
     </div>
 
     <div id="end-screen">
-        <h1>Test Završen!</h1>
-        <p>Hvala Vam što ste učestvovali. Vaš rezultat je izračunat. Kliknite ispod da biste dobili svoj profil u bot chatu.</p>
+        <h1 style="text-align: center;">Test Završen!</h1>
+        <h2 id="profile-name"></h2>
+        <div class="score-info" id="score-display"></div>
+        <p id="profile-procena" style="font-style: italic;"></p>
+        <p id="profile-opis"></p>
+        
         <button id="finishButton" class="main-button" onclick="sendFinalScore()">
-            Prikaži Moj Profil
+            Zatvori Web App (Upis u bazu)
         </button>
     </div>
 </div>
@@ -139,7 +167,9 @@
     Telegram.WebApp.ready();
     Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
 
+    // ✅ Pitanja i Bodovi
     const QUESTIONS_DATA = {
+        // ... (VAŠA PITANJA OD 1 DO 10 OSTAVLJENA OVDE BEZ PROMENE)
         1: {
             "image_path": "https://i.postimg.cc/Xv3QTq0W/image-01.jpg",
             "text": "*Šta se ovde dešava?*",
@@ -251,7 +281,40 @@
             "points": {"A": 1, "B": 3, "C": 4, "D": 2,}
         }
     };
-    
+
+    // ✅ PROFILI PREBAČENI U JS
+    const SCORE_PROFILES = [
+        {
+            range: [10, 17],
+            name: "Prilagođeni",
+            title: "deo sistema koji održava iluziju reda",
+            procena: "Svet za tebe funkcioniše onako kako treba.\nVidiš red tamo gde drugi vide zidove.\nVeruješ da sistem postoji da bi štitio ljude, ne da bi ih kontrolisao. Tvoje poverenje daje mu snagu. Ipak… Iza svetla koje poznaješ postoji senka koju ne primećuješ. Možda si bezbedan — ali nisi slobodan.",
+            opis: "Prilagođeni su temelji svake strukture. Oni su oni koji veruju, poštuju pravila i ne preispituju autoritet. Njihov svet se zasniva na uverenju da je red isto što i istina, i da haos dolazi od onih koji “previše sumnjaju”. Ovi ljudi su često moralni, pouzdani i lojalni. Ali njihova snaga je ujedno i njihova slabost — veruju da je mir važniji od slobode. U kriznim situacijama slede naredbe. Ne pitaju zašto, već kako. Ako dođe dan kada sistem zatraži njihovu poslušnost protiv drugih — oni će poslušati. Ne iz zlobe, već iz uverenja da “tako treba”."
+        },
+        {
+            range: [18, 24],
+            name: "Sumnjičavi",
+            title: "onaj koji se budi, ali još uvek drži oči zatvorene",
+            procena: "U tebi se bore dve strane — poverenje i sumnja.\nOsećaš da nešto nije u redu, ali još uvek tražiš dokaz, znak, istinu. Sistem te ne plaši, ali ni ne uverava. Ti si posmatrač koji čeka trenutak da odluči na koju će stranu. Nisi izgubljen — samo još nisi spreman da progledaš. Ako dođe dan kada sistem zatraži njihovu poslušnost protiv drugih — oni će poslušati. Ne iz zlobe, već iz uverenja da “tako treba”.",
+            opis: "Sumnjičavi su prelazna faza između poslušnosti i svesnosti. To su ljudi koji počinju da osećaju neusklađenost između onoga što im se govori i onoga što vide. Oni ne veruju slepo — ali još uvek se plaše da poveruju sebi. U njima se javlja nemir, tihi glas koji ih upozorava da svet nije onakav kakvim se čini. Ipak, sumnja je za njih težak teret, jer znači da moraju da preuzmu odgovornost. U kriznim trenucima deluju neodlučno, posmatraju pre nego što reaguju. Oni su na ivici buđenja — i sistem to zna. Zato ih ne napada, već im nudi iluziju izbora. Sumnjičavi su uvek na ivici — između onoga što jesu i onoga što mogu postati."
+        },
+        {
+            range: [25, 32],
+            name: "Otporni",
+            title: "onaj koji više ne pristaje",
+            procena: "Ti ne prihvataš svet kakav ti je dat.\nSumnjaš, preispituješ, tražiš. Istina ti je važnija od mira, sloboda vrednija od sigurnosti. Sistem te vidi kao pretnju, jer ti vidiš ono što drugi ne žele da vide. I kad ćutiš, tvoje ćutanje odzvana kao otpor.",
+            opis: "Otporni su oni koji su se probudili, ali još uvek nisu u ratu. Oni razumeju da svet kojim upravlja sistem nije slučajnost — već konstrukcija. Njihova intuicija je snažna, njihova moralna osećanja duboka. Ne traže konflikte, ali ne beže od istine. U kriznim trenucima, oni se oslanjaju na unutrašnju logiku, ne na autoritet. Njihove odluke su ponekad teške, ali uvek svesne. Sistem ih često posmatra, testira, pokušava da ih slomi kroz sumnju i izolaciju. Ali oni opstaju. Otporni su oni koji prepoznaju zabludu — i znaju da istina uvek ima cenu. I spremni su da je plate."
+        },
+        {
+            range: [33, 40],
+            name: "Vizionar",
+            title: "nosilac plamena koji tek dolazi",
+            procena: "Ti ne samo da vidiš istinu — ti je osećaš.\nNe tražiš da se svet promeni. Ti si taj koji menja svet. Sistem te se ne plaši zbog onoga što znaš, već zbog onoga što možeš da pokreneš. Tvoje misli su ispred vremena, a tvoj pogled ne pripada ovom svetu.",
+            opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcioniše kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres. Oni su svetlost u tami — i tama to zna."
+        }
+    ];
+
+
     // Globalne varijable stanja
     let currentQuestionNum = 0;
     let totalScore = 0;
@@ -284,13 +347,11 @@
 
         const data = QUESTIONS_DATA[qNum];
         const optionsContainer = document.getElementById('options-container');
-        optionsContainer.innerHTML = ''; // Cisti prethodne opcije
+        optionsContainer.innerHTML = ''; 
         
-        // Prikazuje redni broj i tekst pitanja
         document.getElementById('question-text').innerHTML = `**Pitanje ${qNum}/${TOTAL_QUESTIONS}**<br><br>${data.text.replace(/\*/g, '')}`; 
         document.getElementById('quiz-image').src = data.image_path;
         
-        // Kreiranje dugmadi za odgovore
         let optionsHtml = '';
         for (const [key, text] of Object.entries(data.full_options)) {
             optionsHtml += `<button class="option-button" data-key="${key}" onclick="handleAnswer('${key}', ${qNum})">**${key}:** ${text}</button>`;
@@ -303,7 +364,6 @@
     function handleAnswer(answerKey, qNum) {
         const questionData = QUESTIONS_DATA[qNum];
         
-        // Dodavanje bodova
         const points = questionData.points[answerKey];
         totalScore += points;
         
@@ -311,25 +371,54 @@
         displayQuestion(currentQuestionNum);
     }
 
+    function getProfileByScore(score) {
+        // Osiguravamo da je rezultat unutar opsega [10, 40]
+        score = Math.max(10, Math.min(40, score));
+        for (const profile of SCORE_PROFILES) {
+            if (score >= profile.range[0] && score <= profile.range[1]) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+    function displayProfile(score) {
+        const profileData = getProfileByScore(score);
+        
+        document.getElementById('score-display').textContent = `VAŠ SKOR: ${score}/40`;
+
+        if (profileData) {
+            document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
+            // Zamena novih redova u tekstu za HTML prikaz
+            document.getElementById('profile-procena').innerHTML = `**PROCENA:**<br>${profileData.procena.replace(/\n/g, '<br>')}`;
+            document.getElementById('profile-opis').innerHTML = `**OPIS:**<br>${profileData.opis.replace(/\n/g, '<br>')}`;
+        } else {
+            document.getElementById('profile-name').textContent = "Greška pri pronalaženju profila";
+            document.getElementById('profile-procena').textContent = "";
+            document.getElementById('profile-opis').textContent = "";
+        }
+    }
+
     function endQuiz() {
+        // Prikazuje profil i ekran
+        displayProfile(totalScore);
         showScreen('end-screen');
-        updateProgress(); // Postavlja traku na 100%
+        updateProgress();
         Telegram.WebApp.MainButton.hide(); 
     }
 
     function sendFinalScore() {
         const dataToSend = {
             "action": "final_score",
-            // ✅ Slanje skora kao STRING da bi se izbegle greške u parsiranju
             "score": totalScore.toString() 
         };
         
         const jsonString = JSON.stringify(dataToSend);
         
-        // ✅ 1. KORAK: Zvanično slanje podataka (najpouzdanije)
+        // Slanje rezultata za upis u Google Sheets
         Telegram.WebApp.sendData(jsonString); 
         
-        // ✅ 2. KORAK: Explicitno zatvaranje prozora
+        // Zatvaranje Web App-a
         Telegram.WebApp.close(); 
     }
     
