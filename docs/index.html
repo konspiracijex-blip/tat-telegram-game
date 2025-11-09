@@ -59,7 +59,7 @@
         🏁 Pokreni Kviz
     </button>
     
-    <p id="statusText" style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
+    <p style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
 
     <script>
         // Inicijalizacija Web App
@@ -75,17 +75,9 @@
             
             const jsonString = JSON.stringify(dataToSend);
             
-            // Šalje signal botu
-            Telegram.WebApp.sendData(jsonString);
-
-            // ✅ KRITIČNO: NE ZATVARAMO PROZOR DA BISMO VIDELI LOGIKU
-            
-            // Ažuriramo poruku
-            document.getElementById('startButton').innerText = 'Signal Poslat (PROVERITE BOTA)';
-            document.getElementById('statusText').innerText = 'Ako je sve u redu, prvo pitanje je stiglo u chat!';
-
-            // Možete dodati i log u konzolu za dalju dijagnostiku
-            console.log("WebApp: Poslao signal: " + jsonString);
+            // ✅ KRITIČNA IZMENA: Koristimo close() sa Query Data. 
+            // Ovo je najjači signal koji Telegram klijent može da pošalje.
+            Telegram.WebApp.close(jsonString); 
         }
     </script>
 </body>
