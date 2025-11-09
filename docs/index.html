@@ -75,8 +75,7 @@
             
             const jsonString = JSON.stringify(dataToSend);
             
-            // ✅ KRITIČNA IZMENA: Koristimo close() sa Query Data. 
-            // Ovo je najjači signal koji Telegram klijent može da pošalje.
+            // Koristimo close() sa Query Data. Prozor se zatvara, podaci se šalju.
             Telegram.WebApp.close(jsonString); 
         }
     </script>
