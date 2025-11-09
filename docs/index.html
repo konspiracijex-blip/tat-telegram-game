@@ -22,7 +22,8 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--tg-bg); 
+            /* ✅ CRNA POZADINA ZA CELU IGRU */
+            background-color: #000000; 
             color: var(--tg-text);
             display: flex;
             flex-direction: column;
@@ -401,8 +402,6 @@
     function displayProfile(score) {
         const profileData = getProfileByScore(score);
         
-        // Uklonjen: document.getElementById('score-display').textContent = `VAŠ SKOR: ${score}/40`;
-
         if (profileData) {
             document.getElementById('profile-name').textContent = `PROFIL ${profileData.name.toUpperCase()} - ${profileData.title}`;
             // Zamena novih redova u tekstu za HTML prikaz
@@ -440,10 +439,11 @@
     }
     
     function showAdditionalText() {
+        const endScreen = document.getElementById('end-screen');
         const container = document.getElementById('additional-text-container');
         const content = document.getElementById('additional-text-content');
         const button = document.getElementById('additionalButton');
-        
+
         const text = `
             Svako ogledalo pokazuje ono što već postoji u nama.<br><br>
             Nema boljih i gorih, samo onih koji su spremni da vide - i onih koji još uvek uče da gledaju.<br>
@@ -461,13 +461,24 @@
         `;
 
         if (container.style.display === 'none') {
+            
+            // ✅ BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
+            document.getElementById('profile-name').style.display = 'none';
+            document.getElementById('profile-procena').style.display = 'none';
+            document.getElementById('profile-opis').style.display = 'none';
+            endScreen.querySelector('h1').style.display = 'none'; // Sakrijemo "Test Završen!"
+
+            // Prikazujemo dodatni tekst
             content.innerHTML = text + channelLink;
             container.style.display = 'block';
-            button.textContent = "Zatvori Web App"; 
-            // Prvi klik prikazuje tekst i menja dugme. Sledeći klik zatvara App.
+            
+            // ✅ Promena teksta dugmeta u "KRAJ"
+            button.textContent = "KRAJ"; 
+            
+            // Re-definišemo akciju dugmeta na zatvaranje App-a
             button.onclick = Telegram.WebApp.close;
         } else {
-            // Ako je već prikazano, zatvaramo App
+            // Ako je već prikazano, zatvaramo App (iako je onclick već redefinisan)
             Telegram.WebApp.close(); 
         }
     }
