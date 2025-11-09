@@ -139,7 +139,6 @@
     Telegram.WebApp.ready();
     Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
 
-    // ✅ Sva pitanja i bodovi su prebačeni u JavaScript
     const QUESTIONS_DATA = {
         1: {
             "image_path": "https://i.postimg.cc/Xv3QTq0W/image-01.jpg",
@@ -308,10 +307,6 @@
         const points = questionData.points[answerKey];
         totalScore += points;
         
-        // Prikazivanje selektovanog odgovora (opciono, samo za povratnu informaciju)
-        console.log(`Pitanje ${qNum}, Odgovor ${answerKey}, Bodovi: ${points}. Ukupno: ${totalScore}`);
-
-        // Prelazak na sledeće pitanje
         currentQuestionNum++;
         displayQuestion(currentQuestionNum);
     }
@@ -319,19 +314,23 @@
     function endQuiz() {
         showScreen('end-screen');
         updateProgress(); // Postavlja traku na 100%
-        Telegram.WebApp.MainButton.hide(); // Sakriva glavni taster (ako je bio prikazan)
+        Telegram.WebApp.MainButton.hide(); 
     }
 
     function sendFinalScore() {
         const dataToSend = {
             "action": "final_score",
-            "score": totalScore
+            // ✅ Slanje skora kao STRING da bi se izbegle greške u parsiranju
+            "score": totalScore.toString() 
         };
         
         const jsonString = JSON.stringify(dataToSend);
         
-        // ✅ Koristimo close() sa Query Data, što je jedini pouzdan signal
-        Telegram.WebApp.close(jsonString); 
+        // ✅ 1. KORAK: Zvanično slanje podataka (najpouzdanije)
+        Telegram.WebApp.sendData(jsonString); 
+        
+        // ✅ 2. KORAK: Explicitno zatvaranje prozora
+        Telegram.WebApp.close(); 
     }
     
     // Prikazuje početni ekran pri učitavanju
