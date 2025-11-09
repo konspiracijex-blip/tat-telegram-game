@@ -123,7 +123,7 @@
             margin-bottom: 25px; /* Razmak ispod linije */
         }
 
-        /* STIL ZA EKRAN ISTEKLOG VREMENA (AŽURIRANO) */
+        /* STIL ZA EKRAN ISTEKLOG VREMENA */
         #timeout-screen {
             display: none;
             width: 100%;
@@ -133,18 +133,14 @@
 
         #timeout-screen h1 {
             color: var(--tg-text);
-            /* Povećan razmak */
             margin-bottom: 20px; 
-            /* Ista veličina kao glavni naslov */
             font-size: 1.6em; 
         }
         #timeout-screen p {
             color: red;
-            /* Ista veličina kao glavni naslov */
             font-size: 1.6em; 
             font-weight: bold;
             margin-bottom: 40px;
-            /* Uklonjen gornji razmak, oslanjamo se na margin-bottom od H1 */
             margin-top: 0; 
         }
 
@@ -327,7 +323,8 @@
             "image_path": "https://i.postimg.cc/L4Gy8VZN/image-09.jpg",
             "text": "*Kome će pripasti?*",
             "full_options": {
-                "A": "Onome kto drži istinu, makar bila bolna.",
+                // ✅ ISPRAVLJENO: "kto" u "ko"
+                "A": "Onome ko drži istinu, makar bila bolna.",
                 "B": "Onome ko ima moć da održi red.",
                 "C": "Nikome – put istine je usamljen.",
                 "D": "Onome ko ćuti, jer samo tihi prežive.",
@@ -523,7 +520,6 @@
         showScreen('end-screen');
         updateProgress(); 
         Telegram.WebApp.MainButton.hide(); 
-        // ✅ sendFinalScore() JE UKLONJENO ODAVDE I PREMEŠTENO NA KLIK DUGMETA 'KRAJ'
     }
 
     function sendFinalScore() {
@@ -573,13 +569,13 @@
             // Promena teksta dugmeta u "KRAJ"
             button.textContent = "KRAJ"; 
             
-            // ✅ IZMENA: Re-definišemo akciju dugmeta na slanje podataka i zatvaranje App-a
+            // Re-definišemo akciju dugmeta na slanje podataka i zatvaranje App-a
             button.onclick = () => {
                 sendFinalScore();
                 Telegram.WebApp.close(); 
             };
         } else {
-            // ✅ IZMENA: Ako se pritisne 'KRAJ', šaljemo podatke i zatvaramo App
+            // Ako se pritisne 'KRAJ', šaljemo podatke i zatvaramo App
             sendFinalScore();
             Telegram.WebApp.close(); 
         }
