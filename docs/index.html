@@ -123,7 +123,7 @@
             margin-bottom: 25px; /* Razmak ispod linije */
         }
 
-        /* ✅ IZMENJENO: STIL ZA EKRAN ISTEKLOG VREMENA */
+        /* STIL ZA EKRAN ISTEKLOG VREMENA (AŽURIRANO) */
         #timeout-screen {
             display: none;
             width: 100%;
@@ -133,16 +133,18 @@
 
         #timeout-screen h1 {
             color: var(--tg-text);
-            /* ✅ IZMENJENO: Povećan razmak */
+            /* Povećan razmak */
             margin-bottom: 20px; 
-            font-size: 1.6em;
+            /* Ista veličina kao glavni naslov */
+            font-size: 1.6em; 
         }
         #timeout-screen p {
             color: red;
-            font-size: 1.6em;
+            /* Ista veličina kao glavni naslov */
+            font-size: 1.6em; 
             font-weight: bold;
             margin-bottom: 40px;
-            /* ✅ IZMENJENO: Uklonjen gornji razmak, oslanjamo se na margin-bottom od H1 */
+            /* Uklonjen gornji razmak, oslanjamo se na margin-bottom od H1 */
             margin-top: 0; 
         }
 
@@ -521,7 +523,7 @@
         showScreen('end-screen');
         updateProgress(); 
         Telegram.WebApp.MainButton.hide(); 
-        sendFinalScore();
+        // ✅ sendFinalScore() JE UKLONJENO ODAVDE I PREMEŠTENO NA KLIK DUGMETA 'KRAJ'
     }
 
     function sendFinalScore() {
@@ -571,9 +573,14 @@
             // Promena teksta dugmeta u "KRAJ"
             button.textContent = "KRAJ"; 
             
-            // Re-definišemo akciju dugmeta na zatvaranje App-a
-            button.onclick = Telegram.WebApp.close;
+            // ✅ IZMENA: Re-definišemo akciju dugmeta na slanje podataka i zatvaranje App-a
+            button.onclick = () => {
+                sendFinalScore();
+                Telegram.WebApp.close(); 
+            };
         } else {
+            // ✅ IZMENA: Ako se pritisne 'KRAJ', šaljemo podatke i zatvaramo App
+            sendFinalScore();
             Telegram.WebApp.close(); 
         }
     }
