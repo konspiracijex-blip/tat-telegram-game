@@ -55,10 +55,11 @@
             width: 100%;
         }
 
+        /* ✅ STIL ZA POLJA ODGOVORA (CRNA POZADINA, BELI OUTLINE) */
         .option-button {
-            background-color: var(--tg-bg);
-            color: var(--tg-text);
-            border: 1px solid var(--tg-hint);
+            background-color: #000000; 
+            color: var(--tg-text); 
+            border: 1px solid #FFFFFF; /* Beli outline */
             padding: 12px;
             margin-bottom: 10px;
             text-align: left;
@@ -74,13 +75,13 @@
              background-color: var(--tg-secondary-bg);
         }
         
-        /* Podesavanje za glavni 'Next'/Pocetni taster */
+        /* ✅ STIL ZA GLAVNE TASTERE (CRNA POZADINA, BELI OUTLINE) */
         .main-button {
-            /* Crni taster */
-            background-color: #000000; 
-            color: #FFFFFF; 
+            background-color: #000000; /* Crna */
+            color: #FFFFFF; /* Beli tekst */
             
-            border: none;
+            border: 1px solid #FFFFFF; /* Beli outline */
+            
             padding: 15px;
             font-size: 18px;
             font-weight: bold;
@@ -139,7 +140,7 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
 
     <div id="start-screen">
-        <h1 style="text-align: center; font-size: 1.8em;">Tematski Appercepcioni Test</h1>
+        <h1 style="text-align: center; font-size: 1.6em;">Tematski Appercepcioni Test</h1>
         <p style="text-align: left; margin-bottom: 25px; color: var(--tg-text);">
             Svet koji poznaješ nije onakav kakvim ti ga prikazuju.
             <br><br>
@@ -426,7 +427,6 @@
     }
 
     function sendFinalScore() {
-        // Ne zatvaramo WebApp odmah, samo šaljemo podatke za upis u bazu
         const dataToSend = {
             "action": "final_score",
             "score": totalScore.toString() 
@@ -466,7 +466,7 @@
             document.getElementById('profile-name').style.display = 'none';
             document.getElementById('profile-procena').style.display = 'none';
             document.getElementById('profile-opis').style.display = 'none';
-            endScreen.querySelector('h1').style.display = 'none'; // Sakrijemo "Test Završen!"
+            endScreen.querySelector('h1').style.display = 'none'; 
 
             // Prikazujemo dodatni tekst
             content.innerHTML = text + channelLink;
@@ -478,7 +478,6 @@
             // Re-definišemo akciju dugmeta na zatvaranje App-a
             button.onclick = Telegram.WebApp.close;
         } else {
-            // Ako je već prikazano, zatvaramo App (iako je onclick već redefinisan)
             Telegram.WebApp.close(); 
         }
     }
