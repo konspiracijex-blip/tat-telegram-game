@@ -59,33 +59,33 @@
         🏁 Pokreni Kviz
     </button>
     
-    <p style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
+    <p id="statusText" style="margin-top: 30px;">Tvoj izbor, tvoja istina.</p>
 
     <script>
         // Inicijalizacija Web App
         Telegram.WebApp.ready();
 
-        // Opciono: Postavljanje natpisa na Telegram prozoru (vizuelni detalji)
         Telegram.WebApp.setHeaderColor('secondary_bg_color'); 
         
         // Funkcija koja se pokreće klikom na dugme
         function startTest() {
-            // Objekat koji šaljemo botu
             const dataToSend = {
                 "action": "start_test"
             };
             
-            // Konvertovanje objekta u JSON string
             const jsonString = JSON.stringify(dataToSend);
             
-            // Slanje JSON stringa botu. 
-            // Ova funkcija ujedno zatvara Web App.
+            // Šalje signal botu
             Telegram.WebApp.sendData(jsonString);
+
+            // ✅ KRITIČNO: NE ZATVARAMO PROZOR DA BISMO VIDELI LOGIKU
             
-            // Dodatna sigurnosna provera za ručno zatvaranje, za svaki slučaj
-            setTimeout(() => {
-                Telegram.WebApp.close();
-            }, 500); 
+            // Ažuriramo poruku
+            document.getElementById('startButton').innerText = 'Signal Poslat (PROVERITE BOTA)';
+            document.getElementById('statusText').innerText = 'Ako je sve u redu, prvo pitanje je stiglo u chat!';
+
+            // Možete dodati i log u konzolu za dalju dijagnostiku
+            console.log("WebApp: Poslao signal: " + jsonString);
         }
     </script>
 </body>
