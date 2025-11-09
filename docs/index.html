@@ -38,6 +38,15 @@
             text-align: center;
         }
 
+        /* STIL ZA SLIKU NA POČETNOM EKRANU */
+        #start-image { 
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 25px; /* Razmak od naslova */
+        }
+        
         #quiz-image {
             width: 100%;
             max-height: 250px;
@@ -100,16 +109,16 @@
             /* Stil za Ime profila (npr. VIZIONAR) */
             text-align: center;
             color: var(--tg-button-color);
-            margin-bottom: 10px; /* Smanjen razmak pre naslova */
+            margin-bottom: 10px; 
         }
-        /* NOVI STIL ZA NASLOV PROFILA (TITLE) */
+        /* STIL ZA NASLOV PROFILA (TITLE) */
         #end-screen h3 { 
             text-align: center;
             color: var(--tg-text);
             font-style: italic;
             font-size: 1.1em; 
             margin-top: 0; 
-            margin-bottom: 30px; /* Razmak ispod naslova */
+            margin-bottom: 30px; 
             font-weight: normal;
         }
         
@@ -129,9 +138,9 @@
         /* STIL ZA TAJMER LINIJU */
         #timer-line {
             width: 100%;
-            height: 2px; /* 2 piksela debela */
-            background-color: red; /* Crvena boja */
-            margin-bottom: 25px; /* Razmak ispod linije */
+            height: 2px; 
+            background-color: red; 
+            margin-bottom: 25px; 
         }
 
         /* STIL ZA EKRAN ISTEKLOG VREMENA */
@@ -179,6 +188,8 @@
     <div id="progress-bar"><div id="progress-fill"></div></div>
 
     <div id="start-screen">
+        
+        <img id="start-image" src="https://i.postimg.cc/tg26KYkL/Cover.jpg" alt="Uvodna slika testa">
         <h1 style="text-align: center; font-size: 1.6em;">Tematski Appercepcioni Test</h1>
         <p style="text-align: left; margin-bottom: 25px; color: var(--tg-text);">
             Svet koji poznaješ nije onakav kakvim ti ga prikazuju.
@@ -382,7 +393,7 @@
             name: "Vizionar",
             title: "nosilac plamena koji tek dolazi",
             procena: "Ti ne samo da vidiš istinu — ti je osećaš.\nNe tražiš da se svet promeni. Ti si taj koji menja svet.\nSistem te se ne plaši zbog onoga što znaš, već zbog onoga što možeš da pokreneš.\nTvoje misli su ispred vremena, a tvoj pogled ne pripada ovom svetu.",
-            opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcioniše kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres.\\nOni su svetlost u tami — i tama to zna."
+            opis: "Vizionari su oni koji ne samo da su svesni — već i deluju. Njihov um funkcionise kao most između sadašnjosti i onoga što dolazi. Oni ne traže potvrdu, jer znaju da istina ne zahteva saglasnost. Njihova percepcija je šira — vide obrasce, strukture i nevidljive niti koje povezuju događaje. U kriznim situacijama ostaju smireni, jer znaju da je haos samo prelazna faza. Oni ne reaguju — oni predviđaju. Sistem ih prepoznaje kao anomalije. Pokušava da ih ućutka, da ih predstavi kao fanatike, da ih izoluje. Ali vizionar zna da je svaka promena prvo bila jeres.\\nOni su svetlost u tami — i tama to zna."
         }
     ];
 
@@ -573,7 +584,7 @@
             
             // BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
             document.getElementById('profile-name').style.display = 'none';
-            document.getElementById('profile-title').style.display = 'none'; // Sakrivanje naslova
+            document.getElementById('profile-title').style.display = 'none'; 
             document.getElementById('profile-procena').style.display = 'none';
             document.getElementById('profile-opis').style.display = 'none';
             endScreen.querySelector('h1').style.display = 'none'; 
