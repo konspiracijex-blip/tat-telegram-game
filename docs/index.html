@@ -133,15 +133,17 @@
 
         #timeout-screen h1 {
             color: var(--tg-text);
-            margin-bottom: 5px; /* Smanjen razmak */
-            font-size: 1.6em; /* Ista veličina kao glavni naslov */
+            /* ✅ IZMENJENO: Povećan razmak */
+            margin-bottom: 20px; 
+            font-size: 1.6em;
         }
         #timeout-screen p {
             color: red;
-            font-size: 1.6em; /* Ista veličina kao glavni naslov */
+            font-size: 1.6em;
             font-weight: bold;
             margin-bottom: 40px;
-            margin-top: 5px; /* Dodat razmak */
+            /* ✅ IZMENJENO: Uklonjen gornji razmak, oslanjamo se na margin-bottom od H1 */
+            margin-top: 0; 
         }
 
         #progress-bar {
@@ -213,7 +215,7 @@
     </div>
 
     <div id="timeout-screen">
-        <h1>VREME ZA ODGOVOR JE ISTEKLO.</h1>
+        <h1>VREME ZA ODGOVOR JE ISTEKLO</h1>
         <p>NISTE PROŠLI TEST</p>
         <button id="restartButton" class="main-button" onclick="startQuiz()">
             POKRENI TEST
@@ -454,7 +456,7 @@
         const optionsContainer = document.getElementById('options-container');
         optionsContainer.innerHTML = ''; 
         
-        // ✅ IZMENA: Uklonjen tekst "Pitanje X/10"
+        // Uklonjen tekst "Pitanje X/10"
         document.getElementById('question-text').innerHTML = `${data.text.replace(/\*/g, '')}`; 
         
         document.getElementById('quiz-image').src = data.image_path;
