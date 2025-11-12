@@ -134,6 +134,16 @@
              padding: 20px 0; 
              border-top: 1px solid var(--tg-hint);
         }
+        
+        /* NOVO: STIL ZA LOGO NA DODATAK EKRANU (40x40px, centriran) */
+        #additional-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%; /* Za okrugli izgled */
+            margin: 0 auto 20px auto; /* Centriranje i razmak ispod */
+            display: block; 
+        }
 
         /* STIL ZA TAJMER LINIJU */
         #timer-line {
@@ -201,7 +211,7 @@
         </p>
         <p style="text-align: left; font-size: 0.9em; margin-bottom: 30px; color: var(--tg-text);">
             Test se zasniva na stvarnom Tematskom appercepcionom testu (TAT), korišćenom u vojnim i obaveštajnim psihološkim procenama. Svaka slika koju vidiš nosi simboliku, a svaki odgovor meri ono što ne možeš sakriti - način na koji gledaš svet.
-            </p>
+        </p>
         <button id="startButton" class="main-button" onclick="startQuiz()">
             POKRENI TEST
         </button>
@@ -225,6 +235,8 @@
         <p id="profile-opis"></p>
         
         <div id="additional-text-container" style="display:none; margin-top: 30px; padding: 20px 0; border-top: 1px solid var(--tg-hint);">
+            
+            <img id="additional-logo" style="display:none;" src="https://i.postimg.cc/43DcfYSD/Konspiracije.jpg" alt="Logo Konspiracije">
             <p id="additional-text-content" style="font-size: 0.95em;"></p>
         </div>
 
@@ -537,78 +549,3 @@
         // Obavezno brisanje tajmera pre kraja
         if (timerId) {
             clearTimeout(timerId);
-            timerId = null;
-        }
-
-        displayProfile(totalScore);
-        showScreen('end-screen');
-        updateProgress(); 
-        Telegram.WebApp.MainButton.hide(); 
-    }
-
-    function sendFinalScore() {
-        const dataToSend = {
-            "action": "final_score",
-            "score": totalScore.toString() 
-        };
-        
-        const jsonString = JSON.stringify(dataToSend);
-        Telegram.WebApp.sendData(jsonString); 
-    }
-    
-    function showAdditionalText() {
-        const endScreen = document.getElementById('end-screen');
-        const container = document.getElementById('additional-text-container');
-        const content = document.getElementById('additional-text-content');
-        const button = document.getElementById('additionalButton');
-
-        const text = `
-            Svako ogledalo pokazuje ono što već postoji u nama.<br><br>
-            Nema boljih i gorih, samo onih koji su spremni da vide - i onih koji još uvek uče da gledaju.<br>
-            Tvoj izbor, tvoje reči i tvoja tišina oblikuju svet više nego što misliš.<br>
-            U vremenu koje dolazi, biće potrebni i oni koji sumnjaju, i oni koji veruju, i oni koji se bore.<br><br>
-            Jer istina se ne rađa iz sile - već iz svesti.<br>
-            Svet se menja kada se promene oni koji ga nose.<br>
-            I zato - ne plaši se onoga što si video.<br><br>
-            Plaši se onoga što bi moglo ostati neviđeno.
-        `;
-        
-        const channelLink = `
-            <br><br>
-            Kanal “<a href="https://t.me/konspiracije" target="_blank" style="color: var(--tg-button-color); text-decoration: none;">Konspiracije</a>” nastavlja da traži one koji gledaju dublje.
-        `;
-
-        if (container.style.display === 'none') {
-            
-            // BRISANJE PRETHODNOG PROFILNOG SADRŽAJA
-            document.getElementById('profile-name').style.display = 'none';
-            document.getElementById('profile-title').style.display = 'none'; 
-            document.getElementById('profile-procena').style.display = 'none';
-            document.getElementById('profile-opis').style.display = 'none';
-            endScreen.querySelector('h1').style.display = 'none'; 
-
-            // Prikazujemo dodatni tekst
-            content.innerHTML = text + channelLink;
-            container.style.display = 'block';
-            
-            // Promena teksta dugmeta u "KRAJ"
-            button.textContent = "KRAJ"; 
-            
-            // Re-definišemo akciju dugmeta na slanje podataka i zatvaranje App-a
-            button.onclick = () => {
-                sendFinalScore();
-                Telegram.WebApp.close(); 
-            };
-        } else {
-            // Ako se pritisne 'KRAJ', šaljemo podatke i zatvaramo App
-            sendFinalScore();
-            Telegram.WebApp.close(); 
-        }
-    }
-    
-    // Prikazuje početni ekran pri učitavanju
-    showScreen('start-screen');
-    updateProgress();
-</script>
-</body>
-</html>
