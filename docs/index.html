@@ -549,3 +549,80 @@
         // Obavezno brisanje tajmera pre kraja
         if (timerId) {
             clearTimeout(timerId);
+            timerId = null;
+        }
+
+        displayProfile(totalScore);
+        showScreen('end-screen');
+        updateProgress(); 
+        Telegram.WebApp.MainButton.hide(); 
+    }
+
+    function sendFinalScore() {
+        const dataToSend = {
+            "action": "final_score",
+            "score": totalScore.toString() 
+        };
+        
+        const jsonString = JSON.stringify(dataToSend);
+        Telegram.WebApp.sendData(jsonString); 
+    }
+    
+    function showAdditionalText() {
+        const endScreen = document.getElementById('end-screen');
+        const container = document.getElementById('additional-text-container');
+        const content = document.getElementById('additional-text-content');
+        const button = document.getElementById('additionalButton');
+        const logo = document.getElementById('additional-logo'); // NOVO: Dohvatamo logo
+
+        const text = `
+            Svako ogledalo pokazuje ono što već postoji u nama.<br><br>
+            Nema boljih i gorih, samo onih koji su spremni da vide - i onih koji još uvek uče da gledaju.<br>
+            Tvoj izbor, tvoje reči i tvoja tišina oblikuju svet više nego što misliš.<br>
+            U vremenu koje dolazi, biće potrebni i oni koji sumnjaju, i oni koji veruju, i oni koji se bore.<br><br>
+            Jer istina se ne rađa iz sile - već iz svesti.<br>
+            Svet se menja kada se promene oni koji ga nose.<br>
+            I zato - ne plaši se onoga što si video.<br><br>
+            Plaši se onoga što bi moglo ostati neviđeno.
+        `;
+        
+        const channelLink = `
+            <br><br>
+            Kanal “<a href="https://t.me/konspiracije" target="_blank" style="color: var(--tg-button-color); text-decoration: none;">Konspiracije</a>” nastavlja da traži one koji gledaju dublje.
+        `;
+
+        if (container.style.display === 'none') {
+            
+            // SAKRIVANJE PRETHODNOG PROFILNOG SADRŽAJA
+            document.getElementById('profile-name').style.display = 'none';
+            document.getElementById('profile-title').style.display = 'none'; 
+            document.getElementById('profile-procena').style.display = 'none';
+            document.getElementById('profile-opis').style.display = 'none';
+            endScreen.querySelector('h1').style.display = 'none'; 
+
+            // PRIKAZ LOGA I TEKSTA
+            logo.style.display = 'block'; // Prikaz loga
+            content.innerHTML = text + channelLink;
+            container.style.display = 'block';
+            
+            // Promena teksta dugmeta u "KRAJ"
+            button.textContent = "KRAJ"; 
+            
+            // Re-definišemo akciju dugmeta na slanje podataka i zatvaranje App-a
+            button.onclick = () => {
+                sendFinalScore();
+                Telegram.WebApp.close(); 
+            };
+        } else {
+            // Ako se pritisne 'KRAJ', šaljemo podatke i zatvaramo App
+            sendFinalScore();
+            Telegram.WebApp.close(); 
+        }
+    }
+    
+    // Prikazuje početni ekran pri učitavanju
+    showScreen('start-screen');
+    updateProgress();
+</script>
+</body>
+</html>
